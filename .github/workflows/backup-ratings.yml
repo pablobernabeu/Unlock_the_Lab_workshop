@@ -1,0 +1,46 @@
+name: Backup Firebase Ratings
+
+on:
+  schedule:
+    # Run every day at midnight UTC
+    - cron: '0 0 * * *'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Create data directory
+        run: mkdir -p data
+      
+      - name: Fetch ratings from Firebase
+        run: |
+          curl -o data/ratings.json \
+            "https://unlock-the-lab-workshop-default-rtdb.europe-west1.firebasedatabase.app/ratings.json"
+      
+      - name: Fetch leaderboard from Firebase
+        run: |
+          curl -o data/leaderboard.json \
+            "https://unlock-the-lab-workshop-default-rtdb.europe-west1.firebasedatabase.app/leaderboard.json"
+      
+      - name: Fetch active participants from Firebase
+        run: |
+          curl -o data/active.json \
+            "https://unlock-the-lab-workshop-default-rtdb.europe-west1.firebasedatabase.app/active.json"
+      
+      - name: Add timestamp
+        run: |
+          echo "{\"lastBackup\": \"$(date -u +"%Y-%m-%dT%H:%M:%SZ")\"}" > data/backup-info.json
+      
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/
+          git diff --quiet && git diff --staged --quiet || \
+            (git commit -m "Backup Firebase data - $(date -u +"%Y-%m-%d %H:%M UTC")" && git push)
