@@ -77,9 +77,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // Load content - MUST complete before generating pages
     await loadContent();
+    console.log('Content loaded. Papers:', papers.length);
     
     // Generate paper pages AFTER content is loaded
     generatePaperPages();
+    console.log('Paper pages generated');
     
     // Initialize glossary and rubric AFTER pages exist
     renderGlossary();
@@ -606,6 +608,7 @@ function generatePaperPages() {
 
 // Page navigation
 function showPage(pageIndex) {
+    console.log('showPage called with pageIndex:', pageIndex, 'papers.length:', papers.length);
     const pages = document.querySelectorAll('.page');
     pages.forEach(page => page.classList.remove('active'));
     
@@ -616,7 +619,10 @@ function showPage(pageIndex) {
     } else if (pageIndex === 1) {
         targetPage = document.getElementById('page-guide');
     } else if (pageIndex <= papers.length + 1) {
-        targetPage = document.getElementById(`page-paper-${pageIndex - 2}`);
+        const paperIndex = pageIndex - 2;
+        console.log('Trying to show paper page:', paperIndex);
+        targetPage = document.getElementById(`page-paper-${paperIndex}`);
+        console.log('Target page found:', !!targetPage);
         // Show help button and score banner on paper pages
         document.getElementById('help-button').classList.add('visible');
         document.getElementById('score-banner').style.display = 'flex';
@@ -631,6 +637,8 @@ function showPage(pageIndex) {
     if (targetPage) {
         targetPage.classList.add('active');
         window.scrollTo(0, 0);
+    } else {
+        console.error('Target page not found for pageIndex:', pageIndex);
     }
     
     currentPage = pageIndex;
