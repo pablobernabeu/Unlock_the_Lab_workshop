@@ -42,19 +42,19 @@ Complete these 2 steps to fix the "PERMISSION_DENIED" error:
 
 ---
 
-## ✅ Step 2: Create Admin User (1 minute)
+## ✅ Step 2: Enable Google Sign-In (1 minute)
 
 **Problem:** You can't login to the admin panel at `/admin.html`
 
 **Solution:**
 
 1. Still in Firebase Console
-2. Click: **Authentication** → **Users** tab
-3. Click: **Add User**
-4. Enter your email and a password (save these!)
-5. Click: **Add User**
+2. Click: **Authentication** → **Sign-in method** tab
+3. Click: **Add new provider** → Select **Google**
+4. Toggle **Enable** to ON
+5. Click **Save**
 
-**Test:** Go to `unlock-the-lab.web.app/admin.html` and login with your credentials
+**Test:** Go to `unlock-the-lab.web.app/admin.html` and click "Sign in with Google"
 
 ---
 

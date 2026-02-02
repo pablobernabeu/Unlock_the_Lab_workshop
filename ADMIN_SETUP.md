@@ -1,23 +1,30 @@
 # Admin Panel Setup Guide
 
-## 🔐 Quick Setup (5 minutes)
+## 🔐 Quick Setup (2 minutes)
 
-### Step 1: Create Admin User
+### Step 1: Enable Google Sign-In
 
 1. Open [Firebase Console](https://console.firebase.google.com/)
 2. Select project: **unlock-the-lab-workshop**
-3. Click **Authentication** → **Users** tab
-4. Click **Add User**
-5. Enter email and password (save these!)
-6. Click **Add User**
+3. Click **Authentication** → **Sign-in method** tab
+4. Click **Add new provider**
+5. Select **Google**
+6. Toggle **Enable** to ON
+7. Click **Save**
 
-### Step 2: Access Admin Panel
+### Step 2: Add Your Google Account
 
-After deploying:
+1. Still in Firebase Console
+2. Click **Authentication** → **Users** tab
+3. Your email will appear here automatically after first login
+4. Or manually add: Click **Add User** → Enter your Google email
+
+### Step 3: Access Admin Panel
 
 1. Navigate to: `https://unlock-the-lab.web.app/admin.html`
-2. Login with your email/password
-3. Done!
+2. Click **Sign in with Google**
+3. Choose your Google account
+4. Done!
 
 ---
 
