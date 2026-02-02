@@ -1,25 +1,15 @@
 # Firebase Database Rules Configuration
 
-## Problem: "Error submitting rating"
+## ⚠️ URGENT: Fix "PERMISSION_DENIED" Error
 
-If users are getting "Error submitting rating. Please try again." errors, it's because the Firebase Realtime Database rules are blocking writes.
+If you're seeing **"Error submitting rating: PERMISSION_DENIED: Permission denied"**, you MUST update your Firebase database rules immediately.
 
-## Solution: Update Database Rules
-
-Go to [Firebase Console](https://console.firebase.google.com/) and update your database rules:
-
-### Steps:
+## Quick Fix (5 minutes)
 
 1. Open [Firebase Console](https://console.firebase.google.com/)
 2. Select project: **unlock-the-lab-workshop**
-3. Click **Realtime Database** in left menu
-4. Click the **Rules** tab
-5. Replace with the rules below
-6. Click **Publish**
-
-### Recommended Rules (Public Read/Write for Workshop Data)
-
-Since this is an anonymous workshop app with no personal data:
+3. Click **Realtime Database** → **Rules** tab
+4. **Copy and paste this** (replace everything):
 
 ```json
 {
@@ -40,7 +30,15 @@ Since this is an anonymous workshop app with no personal data:
 }
 ```
 
-**Why this is safe:**
+5. Click **Publish**
+6. Refresh your workshop app
+7. Try submitting a rating - it should work now!
+
+---
+
+## Why This Is Safe
+
+Your workshop app collects **zero personal information**:
 - No personal information is collected
 - Session IDs are random and not linked to users
 - Usernames are auto-generated (e.g., "Red Raccoon")

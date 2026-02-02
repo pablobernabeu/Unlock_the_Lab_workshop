@@ -1,30 +1,43 @@
 # Admin Panel Setup Guide
 
-## Creating an Admin User
+## 🔐 Quick Setup (5 minutes)
 
-To access the admin panel at `admin.html`, you need to create an admin user in Firebase Authentication:
+### Step 1: Create Admin User
 
-### Steps:
-
-1. Go to [Firebase Console](https://console.firebase.google.com/)
-2. Select your project: **unlock-the-lab-workshop**
-3. Click **Authentication** in the left menu
-4. Click **Get Started** (if this is your first time)
-5. Click **Users** tab
+1. Open [Firebase Console](https://console.firebase.google.com/)
+2. Select project: **unlock-the-lab-workshop**
+3. Click **Authentication** → **Users** tab
+4. Click **Add User**
+5. Enter email and password (save these!)
 6. Click **Add User**
-7. Enter:
-   - **Email:** your email address
-   - **Password:** a secure password
-8. Click **Add User**
 
-## Accessing the Admin Panel
+### Step 2: Access Admin Panel
 
-1. Navigate to: `https://unlock-the-lab.web.app/admin.html` (or your domain)
-2. Login with the email and password you created
-3. You can now:
-   - View active sessions count
-   - See total ratings and leaderboard entries
-   - Stop all active sessions (forces users to restart)
+After deploying:
+
+1. Navigate to: `https://unlock-the-lab.web.app/admin.html`
+2. Login with your email/password
+3. Done!
+
+---
+
+## Two Dashboards Explained
+
+### 1️⃣ Admin Panel (Private - `admin.html`)
+
+- **Who:** Only you (requires login)
+- **Access:** Welcome page → "Admin" link
+- **Features:** Session management, stop all sessions
+- **URL:** `unlock-the-lab.web.app/admin.html`
+
+### 2️⃣ Public Dashboard (Public - `dashboard.html`)
+
+- **Who:** Anyone (no login)
+- **Access:** Final results page → "View Live Dashboard" button
+- **Features:** Statistics, charts, participant data
+- **URL:** `unlock-the-lab.web.app/dashboard.html`
+
+---
 
 ## Admin Functions
 
