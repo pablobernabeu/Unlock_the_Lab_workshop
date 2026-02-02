@@ -1,0 +1,26 @@
+{
+  "name": "unlock-the-lab-workshop",
+  "version": "1.0.0",
+  "description": "Interactive science literacy workshop with Firebase-powered real-time ratings",
+  "main": "app.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "deploy": "npm run build && firebase deploy"
+  },
+  "keywords": [
+    "science",
+    "education",
+    "workshop",
+    "firebase"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "firebase": "^10.7.1"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  }
+}

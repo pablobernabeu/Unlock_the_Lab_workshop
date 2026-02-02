@@ -1,22 +1,31 @@
-// Firebase Configuration
-// IMPORTANT: Replace these values with your own Firebase project credentials
-// Get these from: Firebase Console > Project Settings > Your apps > Web app
+// Firebase Configuration using npm modules
+import { initializeApp } from 'firebase/app';
+import { getDatabase } from 'firebase/database';
+import { getAnalytics } from 'firebase/analytics';
 
+// Firebase configuration
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyCjLzq8QNQqhGOpTJy3tzwuQrovMm6Vdi4",
+    authDomain: "unlock-the-lab-workshop.firebaseapp.com",
+    databaseURL: "https://unlock-the-lab-workshop-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "unlock-the-lab-workshop",
+    storageBucket: "unlock-the-lab-workshop.firebasestorage.app",
+    messagingSenderId: "604889899913",
+    appId: "1:604889899913:web:d46afe88111e8bcb7d3758",
+    measurementId: "G-HSC51V3CLP"
 };
 
 // Initialize Firebase
-firebase.initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig);
 
 // Get a reference to the database service
-const database = firebase.database();
+const database = getDatabase(app);
+
+// Initialize Analytics
+const analytics = getAnalytics(app);
+
+// Export for use in other modules
+export { app, database, analytics };
 
 // Database structure:
 // /ratings/{paperId}/{sessionId} = {rating: number, timestamp: number}

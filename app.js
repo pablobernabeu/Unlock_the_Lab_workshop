@@ -1,3 +1,7 @@
+// Import Firebase modules
+import { database } from './firebase-config.js';
+import { ref, set, onValue } from 'firebase/database';
+
 // Application State
 let currentPage = 0;
 let papers = [];
@@ -24,6 +28,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Show first page
     showPage(0);
 });
+
+// Expose functions to global scope for HTML onclick handlers
+window.nextPage = nextPage;
+window.enableSubmit = enableSubmit;
+window.submitRating = submitRating;
+window.showHelp = showHelp;
+window.closeHelp = closeHelp;
+window.showTab = showTab;
 
 // Generate unique session ID
 function generateSessionId() {
@@ -247,7 +259,8 @@ async function submitRating(paperIndex, paperId) {
         submitBtn.textContent = 'Submitting...';
         
         // Save rating to Firebase
-        await database.ref(`ratings/${paperId}/${sessionId}`).set({
+        const ratingRef = ref(database, `ratings/${paperId}/${sessionId}`);
+        await set(ratingRef, {
             rating: rating,
             timestamp: Date.now()
         });
@@ -281,7 +294,8 @@ async function showResults(paperIndex, paperId, userRating) {
     document.getElementById(`your-rating-${paperIndex}`).textContent = userRating;
     
     // Listen for real-time updates to calculate average
-    database.ref(`ratings/${paperId}`).on('value', (snapshot) => {
+    const ratingsRef = ref(database, `ratings/${paperId}`);
+    onValue(ratingsRef, (snapshot) => {
         const ratings = snapshot.val();
         
         if (ratings) {

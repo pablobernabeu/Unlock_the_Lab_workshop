@@ -10,8 +10,35 @@ A Firebase-powered web application for interactive science literacy workshops. P
 - **Educational Content**: Built-in glossary and rating rubric accessible anytime
 - **Progressive Flow**: Guided experience from welcome to completion
 - **Firebase Integration**: Real-time database for collaborative rating
+- **Modern Build Setup**: Uses npm and Vite for optimal performance
 
-## Setup Instructions
+## Quick Start
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) (v18 or higher)
+- A Firebase account (free tier is sufficient)
+
+### Installation
+
+1. **Install dependencies**:
+```bash
+npm install
+```
+
+2. **Set up Firebase** (see detailed steps below)
+
+3. **Run development server**:
+```bash
+npm run dev
+```
+
+4. **Build for production**:
+```bash
+npm run build
+```
+
+## Detailed Setup Instructions
 
 ### Prerequisites
 
@@ -43,7 +70,9 @@ A Firebase-powered web application for interactive science literacy workshops. P
 4. Register your app with a nickname (e.g., "Workshop App")
 5. Copy the `firebaseConfig` object shown
 6. Open `firebase-config.js` in this project
-7. Replace the placeholder values with your actual Firebase config:
+7. Replace the configuration values with your actual Firebase config
+
+The file already uses the modular SDK format, so just update the values:
 
 ```javascript
 const firebaseConfig = {
@@ -53,7 +82,8 @@ const firebaseConfig = {
     projectId: "your-project-id",
     storageBucket: "your-project.appspot.com",
     messagingSenderId: "123456789",
-    appId: "1:123456789:web:abcdef123456"
+    appId: "1:123456789:web:abcdef123456",
+    measurementId: "G-XXXXXXXXXX"
 };
 ```
 
@@ -114,7 +144,7 @@ Each paper in `papers.json` should have:
 
 #### Option A: Firebase Hosting (Recommended)
 
-1. Install Firebase CLI:
+1. Install Firebase CLI (if not already installed):
 ```bash
 npm install -g firebase-tools
 ```
@@ -129,32 +159,58 @@ firebase login
 firebase init hosting
 ```
 - Select your Firebase project
-- Set public directory as current directory (`.`)
-- Configure as single-page app: No
-- Don't overwrite existing files
+- Set public directory as **`dist`** (the build output folder)
+- Configure as single-page app: **Yes**
+- Set up automatic builds with GitHub: Optional
 
-4. Deploy:
+4. Build and deploy:
 ```bash
+npm run build
 firebase deploy --only hosting
+```
+
+Or use the combined script:
+```bash
+npm run deploy
 ```
 
 5. Your app will be live at: `https://your-project.firebaseapp.com`
 
 #### Option B: GitHub Pages
 
-1. Create a new GitHub repository
-2. Push all files to the repository
-3. Go to repository Settings → Pages
-4. Select branch (usually `main`) and folder (`/root`)
-5. Save and wait for deployment
-6. Access at: `https://yourusername.github.io/repository-name`
+1. Build the application:
+```bash
+npm run build
+```
+
+2. Create a new GitHub repository
+3. Push the **`dist`** folder contents to the `gh-pages` branch:
+```bash
+cd dist
+git init
+git add -A
+git commit -m "Deploy to GitHub Pages"
+git branch -M gh-pages
+git remote add origin https://github.com/yourusername/repository-name.git
+git push -u origin gh-pages
+```
+
+4. Go to repository Settings → Pages
+5. Select `gh-pages` branch and `/root` folder
+6. Save and wait for deployment
+7. Access at: `https://yourusername.github.io/repository-name`
 
 #### Option C: Netlify
 
-1. Go to [Netlify](https://www.netlify.com/)
-2. Drag and drop your project folder
-3. Your site will be deployed instantly
-4. Optionally configure custom domain
+1. Build the application:
+```bash
+npm run build
+```
+
+2. Go to [Netlify](https://www.netlify.com/)
+3. Drag and drop the **`dist`** folder (not the project root)
+4. Your site will be deployed instantly
+5. Optionally configure custom domain
 
 ### Step 7: Test the Application
 
@@ -234,15 +290,44 @@ firebase database:remove /ratings
 unlock-the-lab-workshop/
 ├── index.html              # Main HTML structure
 ├── styles.css              # All styling and responsive design
-├── app.js                  # Application logic and Firebase integration
-├── firebase-config.js      # Firebase configuration (CUSTOMIZE THIS!)
+├── app.js                  # Application logic (ES Module)
+├── firebase-config.js      # Firebase configuration (ES Module)
 ├── papers.json             # Research paper data
 ├── glossary.json           # Glossary terms
 ├── rubric.json             # Rating criteria
+├── package.json            # npm dependencies and scripts
+├── vite.config.js          # Vite build configuration
+├── .gitignore              # Git ignore file
 ├── README.md               # Original workshop description
 ├── Licence.md              # License information
 └── SETUP.md                # This file
 ```
+
+## Development Workflow
+
+### Running Locally
+
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+```
+
+The app will open at `http://localhost:3000` with hot-reload enabled.
+
+### Building for Production
+
+```bash
+# Create optimized production build
+npm run build
+
+# Preview production build locally
+npm run preview
+```
+
+The build output will be in the `dist/` folder.
 
 ## Customization Tips
 
@@ -289,10 +374,13 @@ See `Licence.md` for license information.
 
 **Ready to Run Your Workshop?**
 
-1. ✅ Firebase project created
-2. ✅ `firebase-config.js` updated with your credentials
-3. ✅ Application deployed
-4. ✅ Tested on mobile device
-5. ✅ QR code or short URL ready
+1. ✅ Node.js installed
+2. ✅ Dependencies installed (`npm install`)
+3. ✅ Firebase project created
+4. ✅ `firebase-config.js` updated with your credentials
+5. ✅ Application built (`npm run build`)
+6. ✅ Application deployed
+7. ✅ Tested on mobile device
+8. ✅ QR code or short URL ready
 
 You're all set! Good luck with your workshop! 🔬✨
