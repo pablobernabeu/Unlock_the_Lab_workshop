@@ -814,6 +814,7 @@ async function showResults(paperIndex, paperId, userRating, userPrediction, isRe
             const totalCount = ratingValues.length + seedWeight;
             const average = totalRatings / totalCount;
             const participantCount = ratingValues.length;
+            const totalParticipants = totalCount; // Include seed weight in display
             
             // Update display with ordinal color scale
             const avgRounded = Math.round(average);
@@ -847,7 +848,7 @@ async function showResults(paperIndex, paperId, userRating, userPrediction, isRe
             }
             
             document.getElementById(`count-${paperIndex}`).textContent = 
-                `Based on ${participantCount} participant${participantCount !== 1 ? 's' : ''}`;
+                `Based on ${totalParticipants} participant${totalParticipants !== 1 ? 's' : ''}`;
             
             // Calculate score based on prediction accuracy
             // Skip recalculation if already calculated (score element has content) or if restoring from saved state
@@ -949,6 +950,8 @@ function showFinalResults() {
     // Display final score
     document.getElementById('final-score').textContent = totalScore;
     
+    console.log('Saving to leaderboard:', { sessionId, totalScore, userName });
+    
     // Save score to leaderboard
     const scoresRef = ref(database, `leaderboard/${sessionId}`);
     set(scoresRef, {
@@ -956,12 +959,17 @@ function showFinalResults() {
         timestamp: Date.now(),
         papersRated: Object.keys(userRatings).length,
         userName: userName
+    }).then(() => {
+        console.log('Score saved successfully');
+    }).catch((error) => {
+        console.error('Error saving score:', error);
     });
     
     // Load and display leaderboard
     const leaderboardRef = ref(database, 'leaderboard');
     onValue(leaderboardRef, (snapshot) => {
         const scores = snapshot.val();
+        console.log('Leaderboard data:', scores);
         
         if (scores) {
             const scoresArray = Object.entries(scores).map(([id, data]) => ({

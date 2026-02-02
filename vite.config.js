@@ -4,6 +4,10 @@ export default {
     outDir: 'dist',
     assetsDir: 'assets',
     rollupOptions: {
+      input: {
+        main: 'index.html',
+        dashboard: 'dashboard.html'
+      },
       output: {
         manualChunks: {
           'firebase': ['firebase/app', 'firebase/database', 'firebase/analytics']
