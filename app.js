@@ -8,7 +8,8 @@ let papers = [];
 let glossary = [];
 let rubric = [];
 let sessionId = null;
-let userRatings = {};
+let userRatings = {}; // Personal ratings
+let userPredictions = {}; // Predicted average ratings
 let totalScore = 0;
 let userName = '';
 
@@ -198,7 +199,8 @@ function generatePaperPages() {
                     </div>
                     
                     <div class="rating-section" id="rating-section-${index}">
-                        <h3>Rate This Study (1-7)</h3>
+                        <h3>1️⃣ Your Scientific Assessment</h3>
+                        <p style="font-size: 0.9rem; color: #666; margin-bottom: 15px;">Based on the rubric, how would YOU rate this study's quality?</p>
                         <div class="rating-scale">
                             ${[1, 2, 3, 4, 5, 6, 7].map(value => `
                                 <div class="rating-option">
@@ -213,9 +215,27 @@ function generatePaperPages() {
                             <span>Poor Quality</span>
                             <span>Excellent Quality</span>
                         </div>
+                        
+                        <h3 style="margin-top: 30px;">2️⃣ Predict the Crowd</h3>
+                        <p style="font-size: 0.9rem; color: #666; margin-bottom: 15px;">What do you think the AVERAGE rating will be from all participants?</p>
+                        <div class="rating-scale">
+                            ${[1, 2, 3, 4, 5, 6, 7].map(value => `
+                                <div class="rating-option">
+                                    <input type="radio" id="prediction-${index}-${value}" 
+                                           name="prediction-${index}" value="${value}"
+                                           onchange="enableSubmit(${index})">
+                                    <label for="prediction-${index}-${value}">${value}</label>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="rating-labels">
+                            <span>Low Average</span>
+                            <span>High Average</span>
+                        </div>
+                        
                         <button class="submit-rating" id="submit-${index}" 
                                 onclick="submitRating(${index}, '${paper.id}')" disabled>
-                            Submit Rating
+                            Submit Both Ratings
                         </button>
                     </div>
                     
@@ -289,21 +309,26 @@ function nextPage() {
     }
 }
 
-// Enable submit button when rating is selected
+// Enable submit button when both rating and prediction are selected
 function enableSubmit(paperIndex) {
-    document.getElementById(`submit-${paperIndex}`).disabled = false;
+    const hasRating = document.querySelector(`input[name="rating-${paperIndex}"]:checked`);
+    const hasPrediction = document.querySelector(`input[name="prediction-${paperIndex}"]:checked`);
+    const submitBtn = document.getElementById(`submit-${paperIndex}`);
+    submitBtn.disabled = !(hasRating && hasPrediction);
 }
 
 // Submit rating to Firebase
 async function submitRating(paperIndex, paperId) {
     const selectedRating = document.querySelector(`input[name="rating-${paperIndex}"]:checked`);
+    const selectedPrediction = document.querySelector(`input[name="prediction-${paperIndex}"]:checked`);
     
-    if (!selectedRating) {
-        alert('Please select a rating before submitting.');
+    if (!selectedRating || !selectedPrediction) {
+        alert('Please provide both your rating and your prediction before submitting.');
         return;
     }
     
     const rating = parseInt(selectedRating.value);
+    const prediction = parseInt(selectedPrediction.value);
     
     try {
         // Disable submit button and show loading
@@ -311,21 +336,23 @@ async function submitRating(paperIndex, paperId) {
         submitBtn.disabled = true;
         submitBtn.textContent = 'Submitting...';
         
-        // Save rating to Firebase
+        // Save both rating and prediction to Firebase
         const ratingRef = ref(database, `ratings/${paperId}/${sessionId}`);
         await set(ratingRef, {
             rating: rating,
+            prediction: prediction,
             timestamp: Date.now()
         });
         
         // Store locally
         userRatings[paperId] = rating;
+        userPredictions[paperId] = prediction;
         
         // Hide rating section
         document.getElementById(`rating-section-${paperIndex}`).style.display = 'none';
         
         // Show results
-        showResults(paperIndex, paperId, rating);
+        showResults(paperIndex, paperId, rating, prediction);
         
     } catch (error) {
         console.error('Error submitting rating:', error);
@@ -334,12 +361,12 @@ async function submitRating(paperIndex, paperId) {
         // Re-enable submit button
         const submitBtn = document.getElementById(`submit-${paperIndex}`);
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Submit Rating';
+        submitBtn.textContent = 'Submit Both Ratings';
     }
 }
 
 // Show results with real-time average
-async function showResults(paperIndex, paperId, userRating) {
+async function showResults(paperIndex, paperId, userRating, userPrediction) {
     const resultsBox = document.getElementById(`results-${paperIndex}`);
     resultsBox.style.display = 'block';
     
@@ -361,20 +388,20 @@ async function showResults(paperIndex, paperId, userRating) {
             document.getElementById(`count-${paperIndex}`).textContent = 
                 `Based on ${participantCount} participant${participantCount !== 1 ? 's' : ''}`;
             
-            // Calculate score (only once when we have at least 2 participants)
+            // Calculate score based on prediction accuracy (only once when we have at least 2 participants)
             if (participantCount >= 2 && !document.getElementById(`score-${paperIndex}`).textContent) {
-                const difference = Math.abs(userRating - average);
+                const difference = Math.abs(userPrediction - average);
                 const score = Math.max(0, 100 - Math.round(difference * 15));
                 totalScore += score;
                 
                 // Display score
                 document.getElementById(`score-${paperIndex}`).textContent = `+${score} pts`;
                 document.getElementById(`score-msg-${paperIndex}`).textContent = 
-                    difference === 0 ? 'Perfect match! 🎯' :
-                    difference <= 0.5 ? 'Excellent! Very close! ⭐' :
-                    difference <= 1 ? 'Great job! Close! 👍' :
-                    difference <= 2 ? 'Good attempt! 👌' :
-                    'Keep practicing! 💪';
+                    difference === 0 ? `Perfect prediction! 🎯 (You predicted ${userPrediction}, average is ${average.toFixed(1)})` :
+                    difference <= 0.5 ? `Excellent prediction! ⭐ (Predicted ${userPrediction}, actual ${average.toFixed(1)})` :
+                    difference <= 1 ? `Great prediction! 👍 (Predicted ${userPrediction}, actual ${average.toFixed(1)})` :
+                    difference <= 2 ? `Good attempt! 👌 (Predicted ${userPrediction}, actual ${average.toFixed(1)})` :
+                    `Keep practicing! 💪 (Predicted ${userPrediction}, actual ${average.toFixed(1)})`;
                 
                 // Update total score display
                 const scoreDisplay = document.getElementById('total-score-header');
