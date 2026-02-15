@@ -12,18 +12,20 @@
         <!-- Score Display (appears after first rating) -->
         <div id="score-banner" class="score-banner" style="display: none;">
             <span id="total-score-header"><span class="medal-icon">🏆</span> 0</span>
-            <span id="session-timer" class="session-timer"></span>
-            <span id="participant-counter" class="participant-count">Loading...</span>
+            <div class="navbar-right">
+                <span id="navbar-paper-number" class="navbar-paper-number" style="display: none;"></span>
+                <span id="navbar-username" class="navbar-username"></span>
+            </div>
         </div>
         
         <!-- Page 1: Welcome -->
         <div class="page active" id="page-welcome">
             <div class="container">
-                <h1><img src="unlock-lab-icon.svg" alt="Unlock the Lab" style="height: 1.8em; vertical-align: middle; margin-right: 0.3em; margin-top: -0.15em;"> Unlock the Lab</h1>
+                <h1><img id="logo-icon" src="unlock-lab-icon.svg" alt="Unlock the Lab" style="height: 1.8em; vertical-align: middle; margin-right: 0.3em; margin-top: -0.15em; cursor: pointer;"> Unlock the Lab</h1>
                 <h2>Your Guide to Reading Science Like a Scientist</h2>
                 
                 <div class="content">
-                    <p class="intro-text">"Chocolate Makes You Smarter!" "This Plant Cures Alzheimer's!" Headlines promise miracles and threaten disasters—but what does the actual science say?</p>
+                    <p class="intro-text">"Chocolate makes you smarter!"—Headlines promise miracles and threaten disasters, but what does the actual science say?</p>
                     
                     <p>In this interactive workshop, you'll become a science detective. You'll evaluate real-world research scenarios using the same criteria professional scientists use to judge quality.</p>
                     
@@ -31,10 +33,11 @@
                         <h3 style="margin-top: 0;">🎯 Your Mission</h3>
                         <p><strong>Dual Challenge:</strong> For each study, you must:</p>
                         <ol style="margin: 10px 0; padding-left: 2.5rem;">
-                            <li><strong>Judge the science</strong> — Rate quality using expert criteria (1-7)</li>
                             <li><strong>Predict the crowd</strong> — Guess what others will rate it on average</li>
+                            <li><strong>Judge the science</strong> — Rate quality using expert criteria (1-7)</li>
                         </ol>
-                        <p style="margin-bottom: 0;"><strong>Scoring:</strong> Points awarded based on prediction accuracy. Can you think like a scientist AND understand how the public perceives research?</p>
+                        <p style="margin-bottom: 0.75rem;"><strong>Scoring:</strong> Points awarded based on prediction accuracy. Can you think like a scientist AND understand how the public perceives research?</p>
+                        <p style="font-size: 0.9rem; color: #856404; margin-bottom: 0;"><strong>Why both?</strong> This dual approach allows you to express your own beliefs about research quality while also reflecting on how those beliefs might differ from others' perspectives.</p>
                     </div>
                     
                     <h3>📚 What You'll Learn:</h3>
@@ -45,30 +48,30 @@
                         <li>✅ Evaluate methodology, sample sizes, and conclusions critically</li>
                     </ul>
                     
-                    <p class="highlight" style="font-size: 1.1rem; padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; text-align: center;">💡 First, you'll learn the tools. Then, you'll test your skills on real scenarios!</p>
+                    <p class="highlight" style="font-size: 1.1rem; padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; text-align: center; text-shadow: 0 1px 3px rgba(0,0,0,0.3); font-weight: 500;">💡 First, you'll learn the tools. Then, you'll test your skills on real scenarios!</p>
                     
                     <div style="margin-top: 2rem; padding: 1.25rem; background: #fff3e0; border: 2px solid #ff9800; border-radius: 8px;">
                         <h3 style="margin-top: 0; color: #e65100; font-size: 1rem;">🏆 Leaderboard & Anonymous Usernames</h3>
                         <p style="font-size: 0.9rem; line-height: 1.6; margin-bottom: 0.75rem;">Complete all studies to appear on the <strong>public leaderboard</strong> and see how your prediction accuracy compares with others!</p>
                         <ul style="font-size: 0.9rem; line-height: 1.6; margin: 0.75rem 0; padding-left: 1.5rem;">
-                            <li>You'll be assigned a <strong>unique anonymous username</strong> (e.g., "Red Fox", "Wise Owl") automatically</li>
-                            <li>Your username is displayed at the bottom of each page during the activity</li>
-                            <li>Rankings are based on how accurately you predict the crowd's average ratings</li>
-                            <li>Top performers receive medal badges (🥇🥈🥉) on the leaderboard</li>
+                            <li>You'll be assigned a <strong>unique anonymous username</strong> (e.g., "Red Fox", "Wise Owl") automatically.</li>
+                            <li>Your username will be displayed on the <strong>results page at the end</strong>.</li>
+                            <li>Rankings are based on how accurately you predict the crowd's average ratings.</li>
+                            <li>Earn badges (🏆🥇🥈🥉) based on your prediction accuracy score.</li>
                         </ul>
                         <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 0;">View the live leaderboard at any time on the <a href="dashboard.html" target="_blank" style="color: #2563eb;">public dashboard</a>.</p>
                     </div>
                     
                     <div style="margin-top: 2rem; padding: 1.25rem; background: #f0f9ff; border: 2px solid #3b82f6; border-radius: 8px;">
                         <h3 style="margin-top: 0; color: #1e40af; font-size: 1rem;">📊 Data Use Notice</h3>
-                        <p style="font-size: 0.9rem; line-height: 1.6; margin-bottom: 0.75rem;">By participating in this task, you agree that your <strong>anonymous data will be used for research purposes</strong> and may be shared and analyzed.</p>
+                        <p style="font-size: 0.9rem; line-height: 1.6; margin-bottom: 0.75rem;">By participating in this task, you agree that your <strong>anonymous data will be used for research purposes</strong> and may be shared and analysed.</p>
                         <ul style="font-size: 0.9rem; line-height: 1.6; margin: 0.75rem 0; padding-left: 1.5rem;">
-                            <li>Your data is identified only by an <strong>automatically assigned anonymous username</strong></li>
-                            <li>Your username will be displayed at the <strong>bottom of every page</strong> during the activity</li>
-                            <li>You need not share this username with anyone if you do not wish to</li>
-                            <li><strong>No demographic details</strong> or personally identifiable information is collected</li>
+                            <li>Your data is identified only by an <strong>automatically assigned anonymous username</strong>.</li>
+                            <li>Your username will be displayed on the <strong>results page at the end</strong>.</li>
+                            <li>You need not share this username with anyone if you do not wish to.</li>
+                            <li><strong>No demographic details</strong> or personally identifiable information is collected.</li>
                         </ul>
-                        <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 0;">All data is fully anonymized and used solely for understanding how people evaluate research quality.</p>
+                        <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 0;">All data is fully anonymised and used solely for understanding how people evaluate research quality.</p>
                     </div>
                     
                     <div style="margin-top: 2rem; padding: 1rem; background: #f8fafc; border-radius: 8px; font-size: 0.9rem; color: #64748b;">
@@ -79,10 +82,7 @@
                     </div>
                 </div>
                 
-                <!-- Username Display -->
-                <div id="username-display-home" style="text-align: center; margin-top: 2rem; padding: 0.75rem; background: #f1f5f9; border-radius: 6px; font-size: 0.9rem; color: #64748b;"></div>
-                
-                <button class="btn-primary" onclick="nextPage()" style="margin-top: 1.5rem;">Get Started</button>
+                <button class="btn-primary" onclick="nextPage()" style="margin-top: 1.5rem;">Get started</button>
                 
                 <!-- Admin Link -->
                 <p style="text-align: right; margin-top: 3rem; font-size: 0.8rem;"><a href="admin.html" style="color: #94a3b8; text-decoration: none;">Admin</a></p>
@@ -108,13 +108,14 @@
                     <div id="rubric-content"></div>
                     
                     <div class="info-box" style="margin-top: 2rem; background: #f3e5f5; border-left: 4px solid #9c27b0;">
-                        <p style="margin: 0;"><strong>💡 Scoring Strategy:</strong> Don't average the criteria—weigh them holistically. A study with excellent methods but clickbait headlines might rate 4-5. A study with everything right rates 6-7. Major flaws (predatory source, hidden data) drop it to 1-3.</p>
+                        <p style="margin: 0 0 0.5rem 0;"><strong>💡 Scoring Strategy:</strong> You can weigh some criteria more strongly than others when forming your overall rating.</p>
+                        <p style="margin: 0; font-size: 0.9rem; color: #666;"><strong>Note:</strong> The order in which criteria appear will rotate across studies to ensure balanced assessment.</p>
                     </div>
                 </div>
                 
                 <div style="display: flex; gap: 1rem; justify-content: space-between;">
                     <button class="btn-secondary" onclick="previousPage()">← Back</button>
-                    <button class="btn-primary" onclick="nextPage()">Start Rating Papers →</button>
+                    <button class="btn-primary" onclick="nextPage()">Start rating papers →</button>
                 </div>
             </div>
         </div>
@@ -128,21 +129,59 @@
                 <h1>🎉 Workshop Complete!</h1>
                 
                 <div class="content">
-                    <div class="final-score-card">
-                        <h2>Your Final Score</h2>
-                        <div class="final-score" id="final-score">0</div>
-                        <div class="score-rank" id="score-rank">Calculating rank...</div>
+                    
+                    <!-- PART 1: PREDICTION PERFORMANCE -->
+                    <div style="margin-bottom: 3rem; padding: 2rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 12px; color: white;">
+                        <h2 style="margin-top: 0; color: white; border-bottom: 2px solid rgba(255,255,255,0.3); padding-bottom: 1rem;">
+                            🎯 Part 1: Your Prediction Performance
+                        </h2>
+                        <p style="font-size: 1.05rem; margin-bottom: 1.5rem;">
+                            How well did you predict what others would rate each study?
+                        </p>
+                        
+                        <div class="final-score-card" style="background: white; color: #1f2937;">
+                            <h3 style="color: #059669;">Your Prediction Accuracy Score</h3>
+                            <div class="final-score" id="final-score">0</div>
+                            <div class="score-rank" id="score-rank">Calculating rank...</div>
+                            <p style="font-size: 0.9rem; color: #666; margin-top: 1rem;">
+                                This score measures how accurately you predicted the crowd's average ratings. Higher scores mean better predictions!
+                            </p>
+                        </div>
+                        
+                        <div class="leaderboard" style="background: rgba(255,255,255,0.95); border-radius: 8px; padding: 1.5rem; margin-top: 1.5rem;">
+                            <h3 style="color: #059669; margin-top: 0;">🏆 Top Predictors</h3>
+                            <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">
+                                See how your prediction accuracy compares to other participants
+                            </p>
+                            <div id="leaderboard-list">Loading...</div>
+                        </div>
                     </div>
                     
-                    <h2>Your Journey</h2>
-                    <p>You've evaluated <span id="total-papers">0</span> research papers using critical scientific thinking.</p>
-                    
-                    <div class="leaderboard">
-                        <h3>🏆 Top Scores</h3>
-                        <div id="leaderboard-list">Loading...</div>
+                    <!-- PART 2: YOUR RATING PROFILE -->
+                    <div style="margin-bottom: 3rem; padding: 2rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; color: white; text-shadow: 0 1px 3px rgba(0,0,0,0.3);">
+                        <h2 style="margin-top: 0; color: white; border-bottom: 2px solid rgba(255,255,255,0.3); padding-bottom: 1rem; font-weight: 600;">
+                            📊 Part 2: Your Rating Profile
+                        </h2>
+                        <p style="font-size: 1.05rem; margin-bottom: 1.5rem; font-weight: 400;">
+                            How did your own quality ratings compare to the crowd's ratings?
+                        </p>
+                        
+                        <!-- Personalized Rating Analysis -->
+                        <div id="rating-analysis" style="display: none;">
+                            <div style="background: rgba(255,255,255,0.95); color: #1f2937; padding: 1.5rem; border-radius: 12px; margin: 1rem 0;">
+                                <p id="analysis-summary" style="font-size: 1.05rem; line-height: 1.7; margin: 0;"></p>
+                            </div>
+                            <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin: 1rem 0;">
+                                <h3 style="color: #20B2AA; margin-top: 0;">Your Ratings vs. Crowd Average</h3>
+                                <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">
+                                    This chart shows how your quality ratings (purple line) compared to what other participants rated on average (green dashed line).
+                                </p>
+                                <canvas id="comparison-chart" style="max-height: 250px; width: 100%;"></canvas>
+                            </div>
+                        </div>
                     </div>
                     
-                    <h3>🎓 What You've Mastered:</h3>
+                    <h2>You've evaluated <span id="total-papers">0</span> research papers!</h2>
                     <ul style="line-height: 1.8;">
                         <li><strong>🔓 Open Access</strong> — Paywalls hide science from public scrutiny. Demand transparency!</li>
                         <li><strong>🚨 Spotting Clickbait</strong> — Sensational headlines usually mean weak science underneath</li>
@@ -172,6 +211,34 @@
                         <p style="font-size: 0.9rem; color: #666; margin-top: 0.5rem;">
                             Real-time ratings and statistics from all participants
                         </p>
+                        
+                        <!-- Save Your Results Section -->
+                        <div style="margin-top: 2rem; padding: 1.5rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; color: white; text-shadow: 0 1px 3px rgba(0,0,0,0.3);">
+                            <h3 style="margin-top: 0; color: white; font-weight: 600;">💾 Save Your Results</h3>
+                            <p style="margin-bottom: 1rem; font-size: 0.95rem; font-weight: 400;">
+                                Want to review your personalized analysis later? Save your results link now! You can return to this page anytime to see:
+                            </p>
+                            <ul style="margin-bottom: 1rem; padding-left: 1.5rem; font-size: 0.9rem; list-style: disc; list-style-position: outside; font-weight: 400;">
+                                <li style="margin-bottom: 0.5rem;">Your rating profile and statistical comparison</li>
+                                <li style="margin-bottom: 0.5rem;">How your ratings compare to the crowd average</li>
+                                <li style="margin-bottom: 0.5rem;">Your complete prediction accuracy scores</li>
+                            </ul>
+                            <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+                                <button id="save-results-link" class="btn-secondary" style="display: none; padding: 0.75rem 1.5rem; background: white; color: #667eea; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: 600;" onclick="copyResultsLink()">
+                                    🔗 Copy link to your results
+                                </button>
+                                <button id="email-results-link" class="btn-secondary" style="display: none; padding: 0.75rem 1.5rem; background: white; color: #667eea; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: 600;" onclick="emailResultsLink()">
+                                    📧 Email my results
+                                </button>
+                            </div>
+                            <p id="link-copied-msg" style="display: none; font-size: 0.9rem; color: #fef3c7; margin-top: 0.75rem; text-align: center;">
+                                ✓ Link copied! Save it to return to your results anytime.
+                            </p>
+                            <p style="margin-top: 1.5rem; font-size: 0.9rem; font-weight: 400; text-align: center;">
+                                Or visit the <a href="dashboard.html" style="color: white; text-decoration: underline; font-weight: bold; text-shadow: 0 1px 3px rgba(0,0,0,0.4);">live dashboard</a> and enter your name (<strong id="username-display-inline" style="font-weight: 600;"></strong>) to find your results.
+                            </p>
+                        </div>
+                        
                     </div>
                     
                     <p style="text-align: center; margin-top: 2rem; font-size: 1.2rem;">
@@ -200,7 +267,7 @@
             <span class="close" onclick="closeHelp()">&times;</span>
             <div class="modal-tabs">
                 <button class="tab-btn active" onclick="showTab('glossary')">Glossary</button>
-                <button class="tab-btn" onclick="showTab('rubric')">Rating Rubric</button>
+                <button class="tab-btn" onclick="showTab('rubric')">Rating rubric</button>
             </div>
             <div id="modal-glossary" class="tab-content active"></div>
             <div id="modal-rubric" class="tab-content"></div>

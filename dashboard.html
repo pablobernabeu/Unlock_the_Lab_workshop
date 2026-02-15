@@ -18,6 +18,7 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.3);
         }
 
         .container {
@@ -34,7 +35,7 @@
         }
 
         h1 {
-            color: #667eea;
+            color: #20B2AA;
             font-size: 2rem;
             margin-bottom: 10px;
         }
@@ -77,7 +78,7 @@
         .stat-value {
             font-size: 2.5rem;
             font-weight: bold;
-            color: #667eea;
+            color: #20B2AA;
         }
 
         .stat-label {
@@ -101,7 +102,7 @@
         }
 
         .chart-card h2 {
-            color: #667eea;
+            color: #20B2AA;
             font-size: 1.3rem;
             margin-bottom: 20px;
         }
@@ -133,7 +134,7 @@
 
         th {
             background: #f9fafb;
-            color: #667eea;
+            color: #20B2AA;
             font-weight: 600;
             cursor: pointer;
             user-select: none;
@@ -155,12 +156,12 @@
 
         th.sort-asc::after {
             content: '↑';
-            color: #667eea;
+            color: #20B2AA;
         }
 
         th.sort-desc::after {
             content: '↓';
-            color: #667eea;
+            color: #20B2AA;
         }
 
         tbody tr:hover {
@@ -213,7 +214,7 @@
         }
 
         .admin-panel h3 {
-            color: #667eea;
+            color: #20B2AA;
             margin-bottom: 20px;
             font-size: 1.5rem;
         }
@@ -229,7 +230,7 @@
 
         .admin-input:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #20B2AA;
         }
 
         .admin-timer {
@@ -311,6 +312,16 @@
             h1 {
                 font-size: 1.5rem;
             }
+            
+            #leaderboardGrid {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            #leaderboardGrid {
+                grid-template-columns: 1fr !important;
+            }
         }
         
         /* Study Details Modal */
@@ -356,7 +367,7 @@
         }
         
         .leaderboard-tab:hover {
-            color: #667eea !important;
+            color: #20B2AA !important;
         }
     </style>
 </head>
@@ -382,11 +393,6 @@
                 <p style="font-size: 0.75rem; color: #9ca3af; margin-top: 0.5rem;">Number of study ratings submitted by all participants</p>
             </div>
             <div class="stat-card">
-                <div class="stat-value" id="completedSessions">0</div>
-                <div class="stat-label">Completed Sessions</div>
-                <p style="font-size: 0.75rem; color: #9ca3af; margin-top: 0.5rem;">Total participants who finished all studies</p>
-            </div>
-            <div class="stat-card">
                 <div class="stat-value" id="uniqueParticipants">0</div>
                 <div class="stat-label">Participants</div>
                 <p style="font-size: 0.75rem; color: #9ca3af; margin-top: 0.5rem;">Total number of different users who have submitted ratings</p>
@@ -398,18 +404,49 @@
             </div>
         </div>
 
+        <!-- Review Your Results Section -->
+        <div id="results-access-section" class="stat-card" style="margin-bottom: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; text-shadow: 0 1px 3px rgba(0,0,0,0.3);">
+            <h2 style="color: white; margin-bottom: 15px; font-weight: 600;">📊 Review Your Results</h2>
+            <p style="margin-bottom: 15px; font-size: 0.95rem; font-weight: 400;">Completed the workshop? Enter your username below to view your personalised results page.</p>
+            <div id="results-link-display" style="display: none; padding: 15px; background: rgba(255,255,255,0.2); border-radius: 8px; margin-bottom: 10px;">
+                <p style="margin-bottom: 10px; font-size: 0.9rem;">Your session was detected!</p>
+                <button onclick="goToMyResults()" style="padding: 12px 24px; background: white; color: #667eea; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.2s;">
+                    🔍 View my results
+                </button>
+            </div>
+            <div id="results-manual-entry">
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <input type="text" id="sessionLinkInput" placeholder="Enter your username..." style="flex: 1; min-width: 250px; max-width: 400px; padding: 12px; border: 2px solid rgba(255,255,255,0.3); border-radius: 8px; font-size: 0.95rem; background: rgba(255,255,255,0.9);">
+                    <button onclick="loadFromLink()" style="padding: 12px 24px; background: white; color: #667eea; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.2s; white-space: nowrap;">
+                        🔍 View my results
+                    </button>
+                </div>
+                <p id="link-error" style="display: none; color: #fecaca; font-size: 0.85rem; margin-top: 10px;">⚠️ Please enter a valid username.</p>
+            </div>
+        </div>
+
+        <!-- SECTION 1: PREDICTION PERFORMANCE -->
+        <div style="margin-bottom: 2rem; padding: 1.5rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 12px; color: white;">
+            <h2 style="margin-top: 0; color: white; font-size: 1.8rem; border-bottom: 2px solid rgba(255,255,255,0.3); padding-bottom: 0.75rem;">
+                🎯 Part 1: Prediction Performance
+            </h2>
+            <p style="font-size: 1rem; margin-bottom: 0; opacity: 0.95;">
+                How well did participants predict what others would rate each study?
+            </p>
+        </div>
+
         <!-- Leaderboard Section -->
-        <div class="data-table" style="margin-bottom: 20px;">
-            <h2 style="color: #667eea; margin-bottom: 10px;">🏆 Leaderboard</h2>
-            <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 15px;">Top 200 performers ranked by prediction accuracy. Scores show how well participants predicted crowd ratings.</p>
+        <div class="data-table" style="margin-bottom: 40px;">
+            <h2 style="color: #059669; margin-bottom: 10px;">🏆 Top Predictors</h2>
+            <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 15px;">Top performers ranked by prediction accuracy. Scores show how well participants predicted crowd ratings.</p>
             
             <!-- Leaderboard Tabs -->
             <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #e5e7eb;">
-                <button id="tab24h" class="leaderboard-tab active" onclick="switchLeaderboardTab('24h')" style="padding: 10px 20px; border: none; background: none; color: #667eea; font-weight: bold; cursor: pointer; border-bottom: 3px solid #667eea; transition: all 0.2s;">
-                    📅 Past 24 Hours
+                <button id="tabAllTime" class="leaderboard-tab active" onclick="switchLeaderboardTab('allTime')" style="padding: 10px 20px; border: none; background: none; color: #059669; font-weight: bold; cursor: pointer; border-bottom: 3px solid #059669; transition: all 0.2s;">
+                    🌟 All-time leaders
                 </button>
-                <button id="tabAllTime" class="leaderboard-tab" onclick="switchLeaderboardTab('allTime')" style="padding: 10px 20px; border: none; background: none; color: #6b7280; font-weight: normal; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s;">
-                    🌟 All-Time Leaders
+                <button id="tab24h" class="leaderboard-tab" onclick="switchLeaderboardTab('24h')" style="padding: 10px 20px; border: none; background: none; color: #6b7280; font-weight: normal; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s;">
+                    📅 Past 24 hours
                 </button>
             </div>
             
@@ -418,9 +455,19 @@
             </div>
         </div>
 
+        <!-- SECTION 2: RATING PATTERNS -->
+        <div style="margin-bottom: 2rem; padding: 1.5rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; color: white; text-shadow: 0 1px 3px rgba(0,0,0,0.3);">
+            <h2 style="margin-top: 0; color: white; font-size: 1.8rem; border-bottom: 2px solid rgba(255,255,255,0.3); padding-bottom: 0.75rem; font-weight: 600;">
+                📊 Part 2: Rating Patterns
+            </h2>
+            <p style="font-size: 1rem; margin-bottom: 0; opacity: 0.95; font-weight: 400;">
+                How did participants actually rate the quality of each study?
+            </p>
+        </div>
+
         <div class="charts-grid">
             <div class="chart-card" style="grid-column: 1 / -1;">
-                <h2>📊 Average Ratings by Study</h2>
+                <h2>📊 Average Quality Ratings by Study</h2>
                 <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 1rem;">Mean quality rating (1-7 scale) with 95% confidence intervals. Error bars show rating variability—wider bars indicate less agreement among participants. <strong>Click on any bar to view detailed statistics and study information.</strong></p>
                 <div class="chart-container">
                     <canvas id="ratingsChart"></canvas>
@@ -429,8 +476,8 @@
         </div>
 
         <div class="data-table">
-            <h2 style="color: #667eea; margin-bottom: 10px;">📈 Detailed Statistics</h2>
-            <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 20px;">Complete breakdown of ratings for each study. Std Dev measures disagreement (higher = more variable ratings). Agreement % shows consensus level. Color scales highlight relative values. <strong>Click study names to view detailed information.</strong> Click column headers to sort.</p>
+            <h2 style="color: #20B2AA; margin-bottom: 10px;">📈 Detailed Rating Statistics</h2>
+            <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 20px;">Complete breakdown of how participants rated each study's quality. Std Dev measures disagreement (higher = more variable ratings). Agreement % shows consensus level. Color scales highlight relative values. <strong>Click study names to view detailed information.</strong> Click column headers to sort.</p>
             <table id="statsTable">
                 <thead>
                     <tr>
@@ -498,7 +545,7 @@
                 <div class="admin-timer" id="adminTimer">Time remaining: 10s</div>
                 <div class="admin-buttons">
                     <button class="btn-cancel" onclick="closeAdminPanel()">Cancel</button>
-                    <button class="btn-submit" onclick="verifyPassword()" id="loginBtn">Sign In</button>
+                    <button class="btn-submit" onclick="verifyPassword()" id="loginBtn">Sign in</button>
                 </div>
             </div>
 
@@ -507,9 +554,9 @@
                 
                 <!-- Firebase Usage Statistics (Admin Only) -->
                 <div style="margin-bottom: 20px; padding: 15px; background: #f8fafc; border: 2px solid #e5e7eb; border-radius: 8px;">
-                    <h4 style="color: #667eea; margin-bottom: 12px; font-size: 1rem;">📊 Firebase Usage (Free Tier Limits)</h4>
+                    <h4 style="color: #20B2AA; margin-bottom: 12px; font-size: 1rem;">📊 Firebase Usage (Free Tier Limits)</h4>
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
-                        <div style="padding: 12px; background: white; border-radius: 6px; border-left: 4px solid #667eea;">
+                        <div style="padding: 12px; background: white; border-radius: 6px; border-left: 4px solid #20B2AA;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                                 <span style="font-weight: 600; color: #374151; font-size: 0.85rem;">Connections</span>
                                 <span id="connectionUsage" style="font-size: 1.1rem; font-weight: bold; color: #10b981;">0/100</span>
@@ -532,7 +579,7 @@
                         <div style="padding: 12px; background: white; border-radius: 6px; border-left: 4px solid #f59e0b;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                                 <span style="font-weight: 600; color: #374151; font-size: 0.85rem;">Sessions</span>
-                                <span id="sessionCount" style="font-size: 1.1rem; font-weight: bold; color: #667eea;">0</span>
+                                <span id="sessionCount" style="font-size: 1.1rem; font-weight: bold; color: #20B2AA;">0</span>
                             </div>
                             <p style="font-size: 0.7rem; color: #6b7280; margin-top: 6px; margin-bottom: 0;">Completed</p>
                         </div>
@@ -542,11 +589,11 @@
                 
                 <div class="admin-actions">
                     <button class="btn-danger" onclick="endAllSessions()" id="endSessionsBtn">
-                        ⏹️ End All Active Sessions
+                        ⏹️ End all active sessions
                     </button>
                 </div>
                 <div class="admin-buttons" style="margin-top: 15px;">
-                    <button class="btn-cancel" onclick="adminSignOut()" style="background: #ef4444; color: white;">Sign Out</button>
+                    <button class="btn-cancel" onclick="adminSignOut()" style="background: #ef4444; color: white;">Sign out</button>
                     <button class="btn-cancel" onclick="closeAdminPanel()">Close</button>
                 </div>
             </div>
@@ -584,29 +631,137 @@
             })
             .catch(error => console.error('Error loading papers:', error));
 
-        const paperIds = ['STUDY-101', 'STUDY-102', 'STUDY-103', 'STUDY-104', 'STUDY-105', 'STUDY-106', 
-                          'STUDY-107', 'STUDY-108', 'STUDY-109', 'STUDY-110', 'STUDY-111', 'STUDY-112',
-                          'STUDY-113', 'STUDY-114', 'STUDY-115', 'STUDY-116', 'STUDY-117', 'STUDY-118',
-                          'STUDY-119', 'STUDY-120', 'STUDY-121', 'STUDY-122', 'STUDY-123'];
+        const paperIds = ['STUDY-1', 'STUDY-2', 'STUDY-3', 'STUDY-4', 'STUDY-5', 'STUDY-6', 
+                          'STUDY-7', 'STUDY-8', 'STUDY-9', 'STUDY-10', 'STUDY-11', 'STUDY-12',
+                          'STUDY-13', 'STUDY-14', 'STUDY-15', 'STUDY-16', 'STUDY-17', 'STUDY-18',
+                          'STUDY-19', 'STUDY-20', 'STUDY-21', 'STUDY-22', 'STUDY-23', 'STUDY-24',
+                          'STUDY-25', 'STUDY-26', 'STUDY-27', 'STUDY-28', 'STUDY-29', 'STUDY-30',
+                          'STUDY-31', 'STUDY-32', 'STUDY-33', 'STUDY-34', 'STUDY-35', 'STUDY-36',
+                          'STUDY-37', 'STUDY-38', 'STUDY-39', 'STUDY-40', 'STUDY-41', 'STUDY-42',
+                          'STUDY-43', 'STUDY-44', 'STUDY-45', 'STUDY-46', 'STUDY-47', 'STUDY-48'];
         const paperQualities = {
-            'STUDY-101': 'low', 'STUDY-102': 'medium', 'STUDY-103': 'high', 'STUDY-104': 'low',
-            'STUDY-105': 'medium', 'STUDY-106': 'medium', 'STUDY-107': 'low', 'STUDY-108': 'high',
-            'STUDY-109': 'medium', 'STUDY-110': 'high', 'STUDY-111': 'low', 'STUDY-112': 'low',
-            'STUDY-113': 'high', 'STUDY-114': 'medium', 'STUDY-115': 'low', 'STUDY-116': 'medium',
-            'STUDY-117': 'low', 'STUDY-118': 'medium', 'STUDY-119': 'high', 'STUDY-120': 'low',
-            'STUDY-121': 'medium', 'STUDY-122': 'high', 'STUDY-123': 'low'
+            'STUDY-1': 'low', 'STUDY-2': 'high', 'STUDY-3': 'medium', 'STUDY-4': 'low',
+            'STUDY-5': 'medium', 'STUDY-6': 'medium', 'STUDY-7': 'low', 'STUDY-8': 'high',
+            'STUDY-9': 'medium', 'STUDY-10': 'high', 'STUDY-11': 'low', 'STUDY-12': 'medium',
+            'STUDY-13': 'medium', 'STUDY-14': 'medium', 'STUDY-15': 'medium', 'STUDY-16': 'medium',
+            'STUDY-17': 'medium', 'STUDY-18': 'medium', 'STUDY-19': 'high', 'STUDY-20': 'low',
+            'STUDY-21': 'medium', 'STUDY-22': 'high', 'STUDY-23': 'medium', 'STUDY-24': 'high',
+            'STUDY-25': 'medium', 'STUDY-26': 'medium', 'STUDY-27': 'medium', 'STUDY-28': 'low',
+            'STUDY-29': 'low', 'STUDY-30': 'medium', 'STUDY-31': 'high', 'STUDY-32': 'low',
+            'STUDY-33': 'high', 'STUDY-34': 'low', 'STUDY-35': 'medium', 'STUDY-36': 'low',
+            'STUDY-37': 'high', 'STUDY-38': 'low', 'STUDY-39': 'high', 'STUDY-40': 'low',
+            'STUDY-41': 'high', 'STUDY-42': 'low', 'STUDY-43': 'high', 'STUDY-44': 'medium',
+            'STUDY-45': 'medium', 'STUDY-46': 'low', 'STUDY-47': 'high', 'STUDY-48': 'medium'
         };
         
-        // Seed scores (vetted expert ratings) - weighted as 10 participants each
+        // Seed scores (vetted expert ratings) - weighted as 100 participants each
+        // Distribution: ~7 papers per quality score (1-7) for balanced assessment
         const seedScores = {
-            'STUDY-101': 1, 'STUDY-102': 5, 'STUDY-103': 6, 'STUDY-104': 1,
-            'STUDY-105': 5, 'STUDY-106': 4, 'STUDY-107': 2, 'STUDY-108': 7,
-            'STUDY-109': 4, 'STUDY-110': 6, 'STUDY-111': 2, 'STUDY-112': 1,
-            'STUDY-113': 6, 'STUDY-114': 5, 'STUDY-115': 3, 'STUDY-116': 5,
-            'STUDY-117': 1, 'STUDY-118': 4, 'STUDY-119': 7, 'STUDY-120': 2,
-            'STUDY-121': 5, 'STUDY-122': 6, 'STUDY-123': 1
+            // Score 1 (Predatory/Pseudoscience) - 7 papers
+            'STUDY-1': 1, 'STUDY-4': 1, 'STUDY-29': 1, 'STUDY-32': 1, 'STUDY-34': 1, 'STUDY-40': 1, 'STUDY-46': 1,
+            // Score 2 (Marketing/Severe Conflicts) - 7 papers
+            'STUDY-7': 2, 'STUDY-11': 2, 'STUDY-20': 2, 'STUDY-28': 2, 'STUDY-36': 2, 'STUDY-38': 2, 'STUDY-42': 2,
+            // Score 3 (Weak but Legitimate) - 7 papers
+            'STUDY-9': 3, 'STUDY-12': 3, 'STUDY-15': 3, 'STUDY-17': 3, 'STUDY-23': 3, 'STUDY-25': 3, 'STUDY-44': 3,
+            // Score 4 (Decent but Limited) - 8 papers
+            'STUDY-6': 4, 'STUDY-14': 4, 'STUDY-18': 4, 'STUDY-26': 4, 'STUDY-27': 4, 'STUDY-30': 4, 'STUDY-35': 4, 'STUDY-48': 4,
+            // Score 5 (Good Methods with Limitations) - 6 papers
+            'STUDY-3': 5, 'STUDY-5': 5, 'STUDY-13': 5, 'STUDY-16': 5, 'STUDY-21': 5, 'STUDY-45': 5,
+            // Score 6 (Rigorous, Top Journals) - 7 papers
+            'STUDY-2': 6, 'STUDY-10': 6, 'STUDY-22': 6, 'STUDY-31': 6, 'STUDY-33': 6, 'STUDY-37': 6, 'STUDY-41': 6,
+            // Score 7 (Gold Standard) - 6 papers
+            'STUDY-8': 7, 'STUDY-19': 7, 'STUDY-24': 7, 'STUDY-39': 7, 'STUDY-43': 7, 'STUDY-47': 7
         };
         const seedWeight = 100;
+
+        // Check if user has a session ID from completing the workshop
+        const userSessionId = localStorage.getItem('sessionId');
+        if (userSessionId) {
+            // Show the auto-detected session UI
+            document.getElementById('results-link-display').style.display = 'block';
+            document.getElementById('results-manual-entry').style.display = 'none';
+        }
+
+        // Function to navigate to user's results page
+        window.goToMyResults = function() {
+            const sessionId = localStorage.getItem('sessionId');
+            if (sessionId) {
+                window.location.href = `../?session=${sessionId}`;
+            }
+        };
+
+        // Function to load results from username input
+        window.loadFromLink = function() {
+            const input = document.getElementById('sessionLinkInput').value.trim();
+            const errorMsg = document.getElementById('link-error');
+            
+            if (!input) {
+                errorMsg.textContent = '⚠️ Please enter a username.';
+                errorMsg.style.display = 'block';
+                return;
+            }
+            
+            // First, try to look up the username in the leaderboard data
+            let sessionId = null;
+            
+            // Check if input is already a valid session ID format
+            if (input.startsWith('session_') || input.includes('?session=')) {
+                // Handle as session ID or URL
+                try {
+                    const url = new URL(input);
+                    sessionId = url.searchParams.get('session');
+                } catch (e) {
+                    // Not a valid URL, try as session parameter format
+                    if (input.includes('session=')) {
+                        const match = input.match(/session=([^&\s]+)/);
+                        if (match) {
+                            sessionId = match[1];
+                        }
+                    } else if (input.startsWith('session_')) {
+                        sessionId = input;
+                    }
+                }
+            }
+            
+            // If not a session ID, look up username in leaderboard
+            if (!sessionId && cachedLeaderboardData) {
+                // Search for matching username (case-insensitive)
+                const inputLower = input.toLowerCase();
+                const entries = Object.entries(cachedLeaderboardData);
+                
+                for (const [sid, data] of entries) {
+                    if (data.userName && data.userName.toLowerCase() === inputLower) {
+                        sessionId = sid;
+                        break;
+                    }
+                }
+                
+                if (!sessionId) {
+                    // Try partial match if exact match fails
+                    for (const [sid, data] of entries) {
+                        if (data.userName && data.userName.toLowerCase().includes(inputLower)) {
+                            sessionId = sid;
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            if (sessionId) {
+                errorMsg.style.display = 'none';
+                window.location.href = `../?session=${encodeURIComponent(sessionId)}`;
+            } else {
+                errorMsg.textContent = `⚠️ Username "${input}" not found. Make sure you've completed the workshop and entered your username correctly.`;
+                errorMsg.style.display = 'block';
+            }
+        };
+
+        // Allow Enter key to submit in the input field
+        document.getElementById('sessionLinkInput')?.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                window.loadFromLink();
+            }
+        });
 
         let ratingsChart;
 
@@ -851,13 +1006,12 @@
             document.getElementById('totalRatings').textContent = totalRatings;
             
             const activeCount = activeData ? Object.keys(activeData).filter(key => {
-                const timestamp = activeData[key].timestamp;
-                return Date.now() - timestamp < 60000; // Active in last 60s
+                const lastActive = activeData[key].lastActive;
+                return Date.now() - lastActive < 60000; // Active in last 60s
             }).length : 0;
             document.getElementById('activeParticipants').textContent = activeCount;
             
             const completedCount = leaderboardData ? Object.keys(leaderboardData).length : 0;
-            document.getElementById('completedSessions').textContent = completedCount;
             
             if (leaderboardData) {
                 allScores = Object.values(leaderboardData).map(entry => entry.score || 0);
@@ -1078,13 +1232,13 @@
                     .then(() => {
                         alert(`✅ Successfully ended ${activeCount} session(s)`);
                         btn.disabled = false;
-                        btn.textContent = '⏹️ End All Active Sessions';
+                        btn.textContent = '⏹️ End all active sessions';
                         closeAdminPanel({ target: { id: 'adminOverlay' } });
                     })
                     .catch((error) => {
                         alert('❌ Error ending sessions: ' + error.message);
                         btn.disabled = false;
-                        btn.textContent = '⏹️ End All Active Sessions';
+                        btn.textContent = '⏹️ End all active sessions';
                     });
             }
         };
@@ -1113,12 +1267,19 @@
             const dataAttrs = ['study', 'quality', 'responses', 'mean', 'stddev', 'min', 'max', 'agreement'];
             const attr = dataAttrs[columnIndex];
             
+            // Quality ordering for logical sorting
+            const qualityOrder = { 'low': 1, 'medium': 2, 'high': 3 };
+            
             // Sort rows
             rows.sort((a, b) => {
                 let aVal = a.dataset[attr];
                 let bVal = b.dataset[attr];
                 
-                if (dataType === 'number') {
+                // Special handling for quality column
+                if (columnIndex === 1) {
+                    aVal = qualityOrder[aVal] || 0;
+                    bVal = qualityOrder[bVal] || 0;
+                } else if (dataType === 'number') {
                     aVal = parseFloat(aVal);
                     bVal = parseFloat(bVal);
                 } else {
@@ -1183,7 +1344,7 @@
         }
         
         // Update leaderboard table
-        let currentLeaderboardTab = '24h';
+        let currentLeaderboardTab = 'allTime';
         let cachedLeaderboardData = {};
         
         function updateLeaderboardTable(leaderboardData) {
@@ -1199,16 +1360,16 @@
             const tabAllTime = document.getElementById('tabAllTime');
             
             if (tab === '24h') {
-                tab24h.style.color = '#667eea';
+                tab24h.style.color = '#059669';
                 tab24h.style.fontWeight = 'bold';
-                tab24h.style.borderBottom = '3px solid #667eea';
+                tab24h.style.borderBottom = '3px solid #059669';
                 tabAllTime.style.color = '#6b7280';
                 tabAllTime.style.fontWeight = 'normal';
                 tabAllTime.style.borderBottom = '3px solid transparent';
             } else {
-                tabAllTime.style.color = '#667eea';
+                tabAllTime.style.color = '#059669';
                 tabAllTime.style.fontWeight = 'bold';
-                tabAllTime.style.borderBottom = '3px solid #667eea';
+                tabAllTime.style.borderBottom = '3px solid #059669';
                 tab24h.style.color = '#6b7280';
                 tab24h.style.fontWeight = 'normal';
                 tab24h.style.borderBottom = '3px solid transparent';
@@ -1258,7 +1419,7 @@
                 const medal = rank === 1 ? ' 🥇' : rank === 2 ? ' 🥈' : rank === 3 ? ' 🥉' : '';
                 const displayRank = `#${rank}`;
                 
-                // Calculate colors outside template literal
+                // Define rank-specific styling variables for template rendering
                 let bgColor = '#f9fafb';
                 let borderColor = '#e5e7eb';
                 if (rank === 1) {
@@ -1319,7 +1480,7 @@
             if (paperInfo) {
                 studyDetailsHtml = `
                     <div style="background: #f9fafb; padding: 1.5rem; border-radius: 8px; margin-top: 1rem;">
-                        <h3 style="margin-top: 0; color: #667eea;">Rating Statistics</h3>
+                        <h3 style="margin-top: 0; color: #20B2AA;">Rating Statistics</h3>
                         <table style="width: 100%; border-collapse: collapse;">
                             <tr style="border-bottom: 1px solid #e5e7eb;">
                                 <td style="padding: 0.75rem; font-weight: 600;">Participants:</td>
@@ -1354,33 +1515,33 @@
                     <hr style="margin: 2rem 0; border: none; border-top: 2px solid #e5e7eb;">
                     
                     <div style="margin-top: 1.5rem;">
-                        <h3 style="margin-top: 0; color: #667eea;">Study Details</h3>
-                        <div style="background: #ffffff; padding: 1rem; border-left: 4px solid #667eea; margin-bottom: 1rem;">
-                            <h4 style="margin: 0 0 0.5rem 0; color: #374151; font-size: 1rem;">${paperInfo.headline}</h4>
+                        <h3 style="margin-top: 0; color: #20B2AA;">Study Details</h3>
+                        <div style="background: #ffffff; padding: 1rem; border-left: 4px solid #20B2AA; margin-bottom: 1rem;">
+                            <h4 style="margin: 0 0 0.5rem 0; color: #374151; font-size: 1rem;">${paperInfo.title}</h4>
                         </div>
                         
                         <div style="margin-bottom: 1.25rem;">
-                            <h4 style="color: #667eea; font-size: 0.9rem; margin-bottom: 0.5rem;">📚 Access</h4>
+                            <h4 style="color: #20B2AA; font-size: 0.9rem; margin-bottom: 0.5rem;">📚 Access</h4>
                             <p style="margin: 0; font-size: 0.85rem; line-height: 1.6;">${paperInfo.access}</p>
                         </div>
                         
                         <div style="margin-bottom: 1.25rem;">
-                            <h4 style="color: #667eea; font-size: 0.9rem; margin-bottom: 0.5rem;">🔍 Overview</h4>
+                            <h4 style="color: #20B2AA; font-size: 0.9rem; margin-bottom: 0.5rem;">🔍 Overview</h4>
                             <p style="margin: 0; font-size: 0.85rem; line-height: 1.6;">${paperInfo.overview}</p>
                         </div>
                         
                         <div style="margin-bottom: 1.25rem;">
-                            <h4 style="color: #667eea; font-size: 0.9rem; margin-bottom: 0.5rem;">🧪 Methods</h4>
+                            <h4 style="color: #20B2AA; font-size: 0.9rem; margin-bottom: 0.5rem;">🧪 Methods</h4>
                             <p style="margin: 0; font-size: 0.85rem; line-height: 1.6;">${paperInfo.methods}</p>
                         </div>
                         
                         <div style="margin-bottom: 1.25rem;">
-                            <h4 style="color: #667eea; font-size: 0.9rem; margin-bottom: 0.5rem;">💡 Conclusion</h4>
+                            <h4 style="color: #20B2AA; font-size: 0.9rem; margin-bottom: 0.5rem;">💡 Conclusion</h4>
                             <p style="margin: 0; font-size: 0.85rem; line-height: 1.6;">${paperInfo.conclusion}</p>
                         </div>
                         
                         <div style="margin-bottom: 0;">
-                            <h4 style="color: #667eea; font-size: 0.9rem; margin-bottom: 0.5rem;">📰 Source</h4>
+                            <h4 style="color: #20B2AA; font-size: 0.9rem; margin-bottom: 0.5rem;">📰 Source</h4>
                             <p style="margin: 0; font-size: 0.85rem; line-height: 1.6;">${paperInfo.source}</p>
                         </div>
                     </div>
@@ -1388,7 +1549,7 @@
             } else {
                 studyDetailsHtml = `
                     <div style="background: #f9fafb; padding: 1.5rem; border-radius: 8px; margin-top: 1rem;">
-                        <h3 style="margin-top: 0; color: #667eea;">Rating Statistics</h3>
+                        <h3 style="margin-top: 0; color: #20B2AA;">Rating Statistics</h3>
                         <table style="width: 100%; border-collapse: collapse;">
                             <tr style="border-bottom: 1px solid #e5e7eb;">
                                 <td style="padding: 0.75rem; font-weight: 600;">Participants:</td>

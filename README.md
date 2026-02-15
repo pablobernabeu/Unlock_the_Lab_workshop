@@ -10,8 +10,8 @@ Unlock the Lab is an educational tool designed to develop science literacy by tr
 
 - Develop critical thinking skills for evaluating scientific claims
 - Understand research quality indicators (methodology, data transparency, publication practices)
-- Recognize barriers to accessing scientific knowledge (paywalls, predatory publishing)
-- Practice objective assessment independent of headline framing
+- Recognise barriers to accessing scientific knowledge (paywalls, predatory publishing)
+- Practice objective assessment independent of title framing
 - Build consensus evaluation skills through peer comparison
 
 ## Features
@@ -133,7 +133,7 @@ firebase deploy --only hosting
 - No demographic data or personally identifiable information collected
 - Anonymous usernames auto-generated and validated for uniqueness
 - Session IDs used as primary identifiers
-- All data fully anonymized for research purposes
+- All data fully anonymised for research purposes
 
 ## Project Structure
 

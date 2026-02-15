@@ -12,6 +12,7 @@ let userRatings = {}; // Personal ratings
 let userPredictions = {}; // Predicted average ratings
 let totalScore = 0;
 let userName = '';
+let hasUsedBackButton = false; // Track if user has used their one-time back navigation
 
 // Counterbalancing state
 let featureOrderConfig = [];
@@ -33,36 +34,150 @@ let warningTimeouts = []; // Track multiple warning timeouts
 let firebaseListeners = []; // Track all Firebase listeners for cleanup
 let hasShownWarnings = new Set(); // Track which warnings have been shown
 
-// Seed scores (vetted expert ratings) - weighted as 10 participants each
+// Seed scores (vetted expert ratings) - weighted as 100 participants each
+// Distribution: ~7 papers per quality score (1-7) for balanced assessment
 const seedScores = {
-    'STUDY-101': 1,
-    'STUDY-102': 5,
-    'STUDY-103': 6,
-    'STUDY-104': 1,
-    'STUDY-105': 5,
-    'STUDY-106': 4,
-    'STUDY-107': 2,
-    'STUDY-108': 7,
-    'STUDY-109': 4,
-    'STUDY-110': 6,
-    'STUDY-111': 2,
-    'STUDY-112': 1,
-    'STUDY-113': 6,
-    'STUDY-114': 5,
-    'STUDY-115': 3,
-    'STUDY-116': 5,
-    'STUDY-117': 1,
-    'STUDY-118': 4,
-    'STUDY-119': 7,
-    'STUDY-120': 2,
-    'STUDY-121': 5,
-    'STUDY-122': 6,
-    'STUDY-123': 1
+    // Score 1 (Predatory/Pseudoscience) - 7 papers
+    'STUDY-1': 1,   // Chocolate boosts math scores - predatory journal, tiny sample
+    'STUDY-4': 1,   // Herbal tea prevents Alzheimer's - predatory journal, folk medicine
+    'STUDY-29': 1,  // Vaccine injury conspiracy - misinterprets data, dangerous
+    'STUDY-32': 1,  // 5G causes cancer/autism - physics-defying conspiracy
+    'STUDY-34': 1,  // Alkaline foods - pure pseudoscience, no research
+    'STUDY-40': 1,  // Chemtrails mind control - pure fabrication
+    'STUDY-46': 1,  // Detox tea - fraudulent marketing, no study
+    
+    // Score 2 (Marketing/Severe Conflicts) - 7 papers
+    'STUDY-7': 2,   // AI hiring tool - corporate white paper, biased data
+    'STUDY-11': 2,  // Tall men as CEOs - preprint, evolutionary psych overreach
+    'STUDY-20': 2,  // Bitcoin stabilizes economy - non-peer-reviewed, crypto advocacy
+    'STUDY-28': 2,  // Energy drink performance - corporate funded, cherry-picked
+    'STUDY-36': 2,  // Probiotic yogurt - company press release, vague claims
+    'STUDY-38': 2,  // GMO safety panel - industry bias, cherry-picked literature
+    'STUDY-42': 2,  // Testosterone therapy - clinic advertising, profit motive
+    
+    // Score 3 (Weak but Legitimate Attempt) - 7 papers
+    'STUDY-9': 3,   // Violent video games - small sample, not preregistered
+    'STUDY-12': 3,  // Lavender insomnia - small trial, weak controls, aromatherapy basis
+    'STUDY-15': 3,  // Classical music raises IQ - Mozart effect rehash, tiny effect
+    'STUDY-17': 3,  // Remote work productivity - self-reported feelings only
+    'STUDY-23': 3,  // Peptide cream - company trial, self-assessment, no blinding
+    'STUDY-25': 3,  // Crystal water - alternative medicine trial, weak methodology
+    'STUDY-44': 3,  // Organic food - observational, massive confounders
+    
+    // Score 4 (Decent but Limited) - 8 papers
+    'STUDY-6': 4,   // Instagram anxiety - large survey but correlation not causation
+    'STUDY-14': 4,  // Mars soil crops - good methods but title misleads on safety
+    'STUDY-18': 4,  // Gut bacteria depression - good mouse study, overblown conclusions
+    'STUDY-26': 4,  // Alzheimer's drug - high dropout rate, pharma funded
+    'STUDY-27': 4,  // Income inequality health - observational only, can't prove causation
+    'STUDY-30': 4,  // Mediterranean diet - good observational study, self-reported
+    'STUDY-35': 4,  // Green space mental health - correlation only, income confounders
+    'STUDY-48': 4,  // Magnet arthritis - weak evidence, likely placebo effect
+    
+    // Score 5 (Good Methods with Limitations) - 6 papers
+    'STUDY-3': 5,   // Screens delay sleep - good theory, large sample, self-reported
+    'STUDY-5': 5,   // Pesticide bees - field trial, preregistered, specific claims
+    'STUDY-13': 5,  // Urban foxes diet - rigorous methods, respected journal
+    'STUDY-16': 5,  // EV battery cold - solid physics, government research
+    'STUDY-21': 5,  // Vertical farms - life-cycle assessment, trade-offs acknowledged
+    'STUDY-45': 5,  // Sitting breaks - randomized crossover, short-term only
+    
+    // Score 6 (Rigorous, Top Journals) - 7 papers
+    'STUDY-2': 6,   // Aircraft alloy - rigorous testing, open data, cautious conclusion
+    'STUDY-10': 6,  // Microplastics blood - novel method, contamination controls, alarming but careful
+    'STUDY-22': 6,  // Smartphone sleep tracking - objective measures, preregistered, top journal
+    'STUDY-31': 6,  // Reading to infants - cluster RCT, blinded assessment, open data
+    'STUDY-33': 6,  // AI cancer detection - external validation, appropriately cautious
+    'STUDY-37': 6,  // Psilocybin therapy - double-blind RCT, standardized protocol, conservative
+    'STUDY-41': 6,  // PrEP HIV prevention - prospective cohort, emphasizes adherence
+    
+    // Score 7 (Gold Standard) - 6 papers
+    'STUDY-8': 7,   // Solar cells - independent replication, top journal, full transparency
+    'STUDY-19': 7,  // Climate reconstruction - thousands of datasets, rigorous stats, NOAA archived
+    'STUDY-24': 7,  // Mindfulness pain - Cochrane systematic review, meta-analysis, gold standard
+    'STUDY-39': 7,  // Sea level rise - multi-model ensemble, uncertainty quantified, archived
+    'STUDY-43': 7,  // CRISPR sickle cell - clinical trial, independent monitoring, long follow-up
+    'STUDY-47': 7   // Participatory budgeting - mixed methods, preregistered, nuanced conclusions
 };
 const seedWeight = 100; // Each seed score counts as 100 participants
 
+// Helper function to get performance icon based on percentage
+function getPerformanceIcon(percentage) {
+    if (percentage >= 90) return '🏆'; // Trophy/Cup
+    if (percentage >= 75) return '🥇'; // Gold medal
+    if (percentage >= 60) return '🥈'; // Silver medal
+    return '🥉'; // Bronze medal
+}
+
+// Logo animation handler
+function initLogoAnimation() {
+    const logo = document.getElementById('logo-icon');
+    if (!logo) return;
+    
+    let isAnimating = false;
+    
+    logo.addEventListener('click', () => {
+        if (isAnimating) return;
+        isAnimating = true;
+        
+        // Add flip animation to logo
+        logo.classList.add('flipping');
+        
+        // Create slime container
+        const slimeContainer = document.createElement('div');
+        slimeContainer.className = 'slime-container';
+        document.body.appendChild(slimeContainer);
+        
+        // Get logo position
+        const logoRect = logo.getBoundingClientRect();
+        const startX = logoRect.left + logoRect.width / 2;
+        const startY = logoRect.top + logoRect.height;
+        
+        // Create multiple slime drops with expanding positions
+        const slimeCount = 7;
+        for (let i = 0; i < slimeCount; i++) {
+            setTimeout(() => {
+                const slime = document.createElement('div');
+                slime.className = 'slime';
+                
+                // Vary horizontal position (expanding outward)
+                const spread = (i - slimeCount / 2) * 40;
+                const jitter = (Math.random() - 0.5) * 30;
+                const size = 60 + Math.random() * 40;
+                
+                slime.style.left = `${startX + spread + jitter}px`;
+                slime.style.top = `${startY}px`;
+                slime.style.width = `${size}px`;
+                slime.style.height = `${size}px`;
+                
+                slimeContainer.appendChild(slime);
+            }, i * 100);
+        }
+        
+        // Clean up after animation completes
+        setTimeout(() => {
+            logo.classList.remove('flipping');
+            slimeContainer.remove();
+            isAnimating = false;
+        }, 4000);
+    });
+}
+
 // Initialize app
 document.addEventListener('DOMContentLoaded', async () => {
+    // Initialize logo animation
+    initLogoAnimation();
+    
+    // Check if viewing results from URL parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionParam = urlParams.get('session');
+    
+    if (sessionParam) {
+        // Load and display results for specified session
+        await loadSessionResults(sessionParam);
+        return;
+    }
+    
     // Try to load saved state first
     const hasState = loadState();
     
@@ -111,9 +226,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (totalScore > 0) {
         const scoreDisplay = document.getElementById('total-score-header');
         if (scoreDisplay) {
-            const totalPapers = papers.length || 23;
-            const percentageScore = Math.round((totalScore / (totalPapers * 100)) * 100);
-            scoreDisplay.innerHTML = `<span class="medal-icon">🏆</span> ${percentageScore}%`;
+            const ratedCount = Object.keys(userRatings).length;
+            const percentageScore = ratedCount > 0 ? Math.round(totalScore / ratedCount) : 0;
+            const icon = getPerformanceIcon(percentageScore);
+            scoreDisplay.innerHTML = `<span class="medal-icon">${icon}</span> ${percentageScore}%`;
             document.getElementById('score-banner').style.display = 'flex';
         }
     }
@@ -132,13 +248,14 @@ window.submitRating = submitRating;
 window.showHelp = showHelp;
 window.closeHelp = closeHelp;
 window.showTab = showTab;
+window.finishEarly = finishEarly;
 
 // Generate unique session ID
 function generateSessionId() {
     return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 }
 
-// Generate child-friendly username
+// Generate child-friendly username with two-digit number
 function generateUsername() {
     const adjectives = [
         'Red', 'Blue', 'Green', 'Yellow', 'Purple', 'Orange', 'Pink', 'Teal',
@@ -154,8 +271,9 @@ function generateUsername() {
     
     const adjective = adjectives[Math.floor(Math.random() * adjectives.length)];
     const animal = animals[Math.floor(Math.random() * animals.length)];
+    const number = Math.floor(Math.random() * 100).toString().padStart(2, '0'); // 00-99
     
-    return `${adjective} ${animal}`;
+    return `${adjective} ${animal} ${number}`;
 }
 
 // Generate a unique username by checking against existing leaderboard usernames
@@ -175,7 +293,7 @@ async function generateUniqueUsername() {
             });
         }
         
-        // Try generating a unique username (max 100 attempts)
+        // Attempt to generate a unique username (max 500 attempts)
         let attempts = 0;
         let username;
         
@@ -183,14 +301,14 @@ async function generateUniqueUsername() {
             username = generateUsername();
             attempts++;
             
-            // If we've tried 100 times and still no unique name, append a number
-            if (attempts >= 100) {
+            // Fallback: if maximum attempts reached, append a counter to ensure uniqueness
+            if (attempts >= 500) {
                 const baseUsername = generateUsername();
                 let counter = 1;
-                username = `${baseUsername} ${counter}`;
+                username = `${baseUsername}-${counter}`;
                 while (existingUsernames.has(username)) {
                     counter++;
-                    username = `${baseUsername} ${counter}`;
+                    username = `${baseUsername}-${counter}`;
                 }
                 break;
             }
@@ -211,7 +329,8 @@ function saveState() {
         userRatings,
         userPredictions,
         totalScore,
-        sessionId
+        sessionId,
+        hasUsedBackButton
     };
     localStorage.setItem('workshopState', JSON.stringify(state));
 }
@@ -227,6 +346,7 @@ function loadState() {
             userPredictions = state.userPredictions || {};
             totalScore = state.totalScore || 0;
             sessionId = state.sessionId || null;
+            hasUsedBackButton = state.hasUsedBackButton || false;
             return true; // State was loaded
         }
     } catch (error) {
@@ -258,25 +378,22 @@ function restoreSubmittedRatings() {
     });
 }
 
-// Display username at bottom of all pages
+// Display username only on results page
 function displayUsername() {
-    // Update home page username display
-    const homeUsernameDisplay = document.getElementById('username-display-home');
-    if (homeUsernameDisplay) {
-        homeUsernameDisplay.innerHTML = `Your username is <span style="color: #667eea; font-weight: 600;">${userName}</span>`;
+    // Update navbar username display (will be shown/hidden by showPage)
+    const navbarUsername = document.getElementById('navbar-username');
+    if (navbarUsername) {
+        navbarUsername.textContent = userName;
     }
     
-    const pages = document.querySelectorAll('.page');
-    pages.forEach(page => {
-        // Skip home page and pages that already have username footer
-        if (page.id === 'page-welcome' || page.querySelector('.username-footer')) return;
-        
+    // Only add username footer to final results page
+    const finalPage = document.getElementById('page-final');
+    if (finalPage && !finalPage.querySelector('.username-footer')) {
         const footer = document.createElement('div');
         footer.className = 'username-footer';
-        footer.style.cssText = 'margin-top: 2rem; padding-top: 0.25rem; border-top: 2px solid #e5e7eb; text-align: center; color: #6b7280; font-size: 0.9rem;';
         footer.innerHTML = `Your username is <span style="color: #667eea; font-weight: 600;">${userName}</span>`;
-        page.querySelector('.container').appendChild(footer);
-    });
+        finalPage.querySelector('.container').appendChild(footer);
+    }
 }
 
 // Start session timeout to prevent excessive Firebase usage
@@ -414,7 +531,7 @@ function updateTimerDisplay() {
     const timerEl = document.getElementById('session-timer');
     if (timerEl && remaining > 0) {
         timerEl.textContent = `${minutes} min | ${papersRemaining} paper${papersRemaining !== 1 ? 's' : ''} left`;
-        // Change color when time is running low
+        // Apply warning colours based on remaining time thresholds
         if (remaining <= 5 * 60000) {
             timerEl.style.color = '#f56565';
         } else if (remaining <= 15 * 60000) {
@@ -468,8 +585,8 @@ function endSession() {
     const totalMinutes = Math.floor((Date.now() - sessionStartTime) / 60000);
     overlay.innerHTML = `
         <div>
-            <h2 style="margin-bottom: 20px;">⏰ Session Expired</h2>
-            <p style="margin-bottom: 20px;">
+            <h2 style="margin-bottom: 20px; color: white;">⏰ Session Expired</h2>
+            <p style="margin-bottom: 20px; color: white;">
                 Your ${totalMinutes}-minute session has ended to conserve resources.<br>
                 Thank you for participating!
             </p>
@@ -554,6 +671,28 @@ function updateParticipantCount() {
     firebaseListeners.push(unsubscribe);
 }
 
+// Shuffle papers array using Fisher-Yates algorithm with seeded randomization
+function shufflePapers() {
+    // Use session ID as seed for consistent randomization per participant
+    let seed = 0;
+    for (let i = 0; i < sessionId.length; i++) {
+        seed = ((seed << 5) - seed) + sessionId.charCodeAt(i);
+        seed = seed & seed; // Convert to 32-bit integer
+    }
+    
+    // Seeded random number generator
+    function seededRandom() {
+        seed = (seed * 9301 + 49297) % 233280;
+        return seed / 233280;
+    }
+    
+    // Fisher-Yates shuffle with seeded random
+    for (let i = papers.length - 1; i > 0; i--) {
+        const j = Math.floor(seededRandom() * (i + 1));
+        [papers[i], papers[j]] = [papers[j], papers[i]];
+    }
+}
+
 // Load content from JSON files
 async function loadContent() {
     try {
@@ -561,35 +700,27 @@ async function loadContent() {
         const featureOrderResponse = await fetch('feature-order-config.json');
         featureOrderConfig = await featureOrderResponse.json();
         
-        // Determine list assignment based on session ID
-        // Extract numeric part from session ID for consistent assignment
-        const sessionNumeric = parseInt(sessionId.split('_')[1]) || Date.now();
-        assignedListId = (sessionNumeric % 6) + 1;
-        
-        // Store list assignment for consistency
-        localStorage.setItem('assignedListId', assignedListId);
-        
-        // Get the feature order configuration for this participant
-        const config = featureOrderConfig.find(c => c.listId === assignedListId);
-        featureOrder = config.featureOrder;
-        featureLabels = config.featureLabels;
-        
-        // Load appropriate rubric version
-        const rubricFile = `rubric-v${assignedListId}.json`;
-        
-        // Load all content in parallel
-        const [glossaryData, rubricData, papersData] = await Promise.all([
+        // Load all 6 rubric versions for within-participant rotation
+        const [glossaryData, rubric1, rubric2, rubric3, rubric4, rubric5, rubric6, papersData] = await Promise.all([
             fetch('glossary.json').then(r => r.json()),
-            fetch(rubricFile).then(r => r.json()),
+            fetch('rubric-v1.json').then(r => r.json()),
+            fetch('rubric-v2.json').then(r => r.json()),
+            fetch('rubric-v3.json').then(r => r.json()),
+            fetch('rubric-v4.json').then(r => r.json()),
+            fetch('rubric-v5.json').then(r => r.json()),
+            fetch('rubric-v6.json').then(r => r.json()),
             fetch('papers.json').then(r => r.json())
         ]);
         
         glossary = glossaryData;
-        rubric = rubricData;
+        // Store all rubric versions in an array (index 0 = version 1, etc.)
+        window.allRubrics = [rubric1, rubric2, rubric3, rubric4, rubric5, rubric6];
+        // Use first rubric for the guide page display
+        rubric = rubric1;
         papers = papersData;
         
-        // Log assignment for debugging
-        console.log(`Participant assigned to List ${assignedListId}:`, featureOrder);
+        // Shuffle papers for this participant (consistent across page reloads)
+        shufflePapers();
         
         // Update total papers count on final page
         document.getElementById('total-papers').textContent = papers.length;
@@ -631,26 +762,28 @@ function renderRubric() {
     }
     
     const rubricHTML = `
-        <table class="rubric-table">
-            <thead>
-                <tr>
-                    <th>Category</th>
-                    <th>Low (1-2)</th>
-                    <th>Medium (3-5)</th>
-                    <th>High (6-7)</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${rubric.map(category => `
+        <div style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+            <table class="rubric-table">
+                <thead>
                     <tr>
-                        <td><strong>${category.name}</strong></td>
-                        <td>${category.low}</td>
-                        <td>${category.medium}</td>
-                        <td>${category.high}</td>
+                        <th>Category</th>
+                        <th>Low (1-2)</th>
+                        <th>Medium (3-5)</th>
+                        <th>High (6-7)</th>
                     </tr>
-                `).join('')}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    ${rubric.map(category => `
+                        <tr>
+                            <td><strong>${category.name}</strong></td>
+                            <td>${category.low}</td>
+                            <td>${category.medium}</td>
+                            <td>${category.high}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        </div>
     `;
     
     if (rubricContent) rubricContent.innerHTML = rubricHTML;
@@ -662,9 +795,15 @@ function generatePaperPages() {
     const paperPagesContainer = document.getElementById('paper-pages');
     
     papers.forEach((paper, index) => {
-        // Generate paper sections in counterbalanced order
-        const paperSectionsHTML = featureOrder.map((feature, position) => {
-            const label = featureLabels[position];
+        // Rotate rubric version for each paper (within-participant)
+        const rubricVersionIndex = index % 6; // 0-5
+        const config = featureOrderConfig[rubricVersionIndex];
+        const paperFeatureOrder = config.featureOrder;
+        const paperFeatureLabels = config.featureLabels;
+        
+        // Generate paper sections in counterbalanced order for this rubric version
+        const paperSectionsHTML = paperFeatureOrder.map((feature, position) => {
+            const label = paperFeatureLabels[position];
             const content = paper[feature];
             return `
                         <div class="paper-section">
@@ -676,17 +815,41 @@ function generatePaperPages() {
         const pageHTML = `
             <div class="page" id="page-paper-${index}">
                 <div class="container">
+                    <button class="back-to-previous-btn" onclick="goBackToPreviousStudy()" style="${hasUsedBackButton || index === 0 ? 'display: none;' : ''}" title="Go back to previous study (one-time use)">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M19 12H5M12 19l-7-7 7-7"/>
+                        </svg>
+                        <span>Back to Previous Study</span>
+                    </button>
                     <div class="paper-card">
                         <div class="paper-header">
-                            <div class="paper-id">${paper.id}</div>
-                            <h1 class="paper-title">${paper.headline}</h1>
+                            <h1 class="paper-title">${paper.title}</h1>
                         </div>
                         ${paperSectionsHTML}
                     </div>
                     
                     <div class="rating-section" id="rating-section-${index}">
-                        <div style="background: #f0f4ff; padding: 15px; border-radius: 8px; margin-bottom: 25px; border-left: 4px solid #667eea;">
-                            <h3 style="margin: 0 0 10px 0; color: #667eea;">1️⃣ Your Scientific Assessment</h3>
+                        <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin-bottom: 25px; border-left: 4px solid #ff9800;">
+                            <h3 style="margin: 0 0 10px 0; color: #f57c00;">1️⃣ Predict the Crowd</h3>
+                            <p style="font-size: 0.95rem; color: #444; margin: 0;">Guess: What will the AVERAGE rating be from all workshop participants? Will others catch the same flaws you did?</p>
+                        </div>
+                        <div class="rating-scale">
+                            ${[1, 2, 3, 4, 5, 6, 7].map(value => `
+                                <div class="rating-option">
+                                    <input type="radio" id="prediction-${index}-${value}" 
+                                           name="prediction-${index}" value="${value}"
+                                           onchange="enableSubmit(${index})">
+                                    <label for="prediction-${index}-${value}">${value}</label>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="rating-labels">
+                            <span>Low Average</span>
+                            <span>High Average</span>
+                        </div>
+                        
+                        <div style="background: #f0f4ff; padding: 15px; border-radius: 8px; margin: 30px 0 15px 0; border-left: 4px solid #667eea;">
+                            <h3 style="margin: 0 0 10px 0; color: #667eea;">2️⃣ Your Scientific Assessment</h3>
                             <p style="font-size: 0.95rem; color: #444; margin: 0;">Review all six rubric criteria. Then assign your overall quality rating:</p>
                         </div>
                         <div class="rating-scale">
@@ -702,25 +865,6 @@ function generatePaperPages() {
                         <div class="rating-labels">
                             <span>Poor Quality</span>
                             <span>Excellent Quality</span>
-                        </div>
-                        
-                        <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin: 30px 0 15px 0; border-left: 4px solid #ff9800;">
-                            <h3 style="margin: 0 0 10px 0; color: #f57c00;">2️⃣ Predict the Crowd</h3>
-                            <p style="font-size: 0.95rem; color: #444; margin: 0;">Now guess: What will the AVERAGE rating be from all workshop participants? Will others catch the same flaws you did?</p>
-                        </div>
-                        <div class="rating-scale">
-                            ${[1, 2, 3, 4, 5, 6, 7].map(value => `
-                                <div class="rating-option">
-                                    <input type="radio" id="prediction-${index}-${value}" 
-                                           name="prediction-${index}" value="${value}"
-                                           onchange="enableSubmit(${index})">
-                                    <label for="prediction-${index}-${value}">${value}</label>
-                                </div>
-                            `).join('')}
-                        </div>
-                        <div class="rating-labels">
-                            <span>Low Average</span>
-                            <span>High Average</span>
                         </div>
                         
                         <button class="submit-rating" id="submit-${index}" 
@@ -752,9 +896,14 @@ function generatePaperPages() {
                         <div class="participant-count" id="count-${index}">
                             Calculating...
                         </div>
-                        <button class="btn-primary" onclick="nextPage()" style="margin-top: 1.5rem;">
-                            ${index < papers.length - 1 ? 'Next Paper' : 'View Results'}
-                        </button>
+                        <div class="navigation-buttons" style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 1.5rem;">
+                            <button class="btn-primary" onclick="nextPage()">
+                                ${index < papers.length - 1 ? 'Next Paper' : 'View Results'}
+                            </button>
+                            <button class="btn-finish" id="finish-btn-${index}" onclick="finishEarly()" style="display: none;">
+                                Finish & View Results
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -766,28 +915,50 @@ function generatePaperPages() {
 
 // Page navigation
 function showPage(pageIndex) {
-    console.log('showPage called with pageIndex:', pageIndex, 'papers.length:', papers.length);
     const pages = document.querySelectorAll('.page');
     pages.forEach(page => page.classList.remove('active'));
     
     // Determine which page to show
     let targetPage;
+    const paperNumberElement = document.getElementById('navbar-paper-number');
+    const navbarUsername = document.getElementById('navbar-username');
+    
     if (pageIndex === 0) {
         targetPage = document.getElementById('page-welcome');
+        if (paperNumberElement) paperNumberElement.style.display = 'none';
+        if (navbarUsername) navbarUsername.style.display = 'none';
     } else if (pageIndex === 1) {
         targetPage = document.getElementById('page-guide');
+        if (paperNumberElement) paperNumberElement.style.display = 'none';
+        if (navbarUsername) navbarUsername.style.display = 'none';
     } else if (pageIndex <= papers.length + 1) {
         const paperIndex = pageIndex - 2;
-        console.log('Trying to show paper page:', paperIndex);
         targetPage = document.getElementById(`page-paper-${paperIndex}`);
-        console.log('Target page found:', !!targetPage);
-        // Show help button and score banner on paper pages
+        // Show help button on paper pages
         document.getElementById('help-button').classList.add('visible');
-        document.getElementById('score-banner').style.display = 'flex';
+        // Update paper number in navbar
+        if (paperNumberElement) {
+            paperNumberElement.textContent = `Paper ${paperIndex + 1} of ${papers.length}`;
+            paperNumberElement.style.display = 'inline';
+        }
+        // Hide username on paper pages
+        if (navbarUsername) navbarUsername.style.display = 'none';
+        // Only show score banner if there's a score > 0
+        const ratedCount = Object.keys(userRatings).length;
+        const percentageScore = ratedCount > 0 ? Math.round(totalScore / ratedCount) : 0;
+        if (percentageScore > 0) {
+            document.getElementById('score-banner').style.display = 'flex';
+        }
     } else {
         targetPage = document.getElementById('page-final');
         // Hide help button on final page
         document.getElementById('help-button').classList.remove('visible');
+        // Hide paper number on final page
+        if (paperNumberElement) {
+            paperNumberElement.style.display = 'none';
+        }
+        // Show username on final page
+        if (navbarUsername) navbarUsername.style.display = 'inline';
         // Show final score and leaderboard
         showFinalResults();
     }
@@ -816,6 +987,41 @@ function previousPage() {
     }
 }
 
+// Finish early after rating at least 12 studies
+function finishEarly() {
+    const totalRated = Object.keys(userRatings).length;
+    if (totalRated < 12) {
+        alert('Please rate at least 12 studies before finishing.');
+        return;
+    }
+    
+    // Go directly to final results page
+    const finalPageIndex = papers.length + 2;
+    showPage(finalPageIndex);
+}
+
+// Go back to previous study (one-time use only)
+function goBackToPreviousStudy() {
+    if (hasUsedBackButton) {
+        return; // Already used their one back action
+    }
+    
+    if (currentPage > 2) { // Can only go back if on a paper page (page 2 is first paper)
+        hasUsedBackButton = true;
+        saveState();
+        
+        // Hide all back buttons
+        const backButtons = document.querySelectorAll('.back-to-previous-btn');
+        backButtons.forEach(btn => {
+            btn.style.display = 'none';
+        });
+        
+        showPage(currentPage - 1);
+    }
+}
+
+window.goBackToPreviousStudy = goBackToPreviousStudy;
+
 // Enable submit button when both rating and prediction are selected
 function enableSubmit(paperIndex) {
     const hasRating = document.querySelector(`input[name="rating-${paperIndex}"]:checked`);
@@ -843,18 +1049,23 @@ async function submitRating(paperIndex, paperId) {
         submitBtn.disabled = true;
         submitBtn.textContent = 'Submitting...';
         
-        console.log('Submitting rating:', { paperId, sessionId, rating, prediction });
+        // First, get current average WITHOUT user's rating to calculate fair prediction score
+        const ratingsRef = ref(database, `ratings/${paperId}`);
+        const snapshot = await get(ratingsRef);
+        const currentRatings = snapshot.val();
         
-        // Save both rating and prediction to Firebase
-        const ratingRef = ref(database, `ratings/${paperId}/${sessionId}`);
-        await set(ratingRef, {
-            rating: rating,
-            prediction: prediction,
-            listId: assignedListId,
-            timestamp: Date.now()
-        });
-        
-        console.log('Rating submitted successfully');
+        let averageWithoutUser = 4; // Default if no ratings yet
+        if (currentRatings) {
+            const ratingValues = Object.values(currentRatings).map(r => r.rating);
+            const seedScore = seedScores[paperId] || 4;
+            const totalRatings = ratingValues.reduce((a, b) => a + b, 0) + (seedScore * seedWeight);
+            const totalCount = ratingValues.length + seedWeight;
+            averageWithoutUser = totalRatings / totalCount;
+        } else {
+            // No ratings yet, use seed score
+            const seedScore = seedScores[paperId] || 4;
+            averageWithoutUser = seedScore;
+        }
         
         // Store locally
         userRatings[paperId] = rating;
@@ -866,8 +1077,20 @@ async function submitRating(paperIndex, paperId) {
         // Hide rating section
         document.getElementById(`rating-section-${paperIndex}`).style.display = 'none';
         
-        // Show results
-        showResults(paperIndex, paperId, rating, prediction);
+        // Show results with pre-calculated average (for fair scoring)
+        showResults(paperIndex, paperId, rating, prediction, false, averageWithoutUser);
+        
+        // Calculate rubric version used for this study (1-6)
+        const rubricVersion = (paperIndex % 6) + 1;
+        
+        // NOW save rating to Firebase (after calculating prediction score)
+        const userRatingRef = ref(database, `ratings/${paperId}/${sessionId}`);
+        await set(userRatingRef, {
+            rating: rating,
+            prediction: prediction,
+            rubricVersion: rubricVersion, // Record which rubric version was shown
+            timestamp: Date.now()
+        });
         
     } catch (error) {
         console.error('Error submitting rating:', error);
@@ -882,11 +1105,71 @@ async function submitRating(paperIndex, paperId) {
 }
 
 // Show results with real-time average
-async function showResults(paperIndex, paperId, userRating, userPrediction, isRestoring = false) {
+async function showResults(paperIndex, paperId, userRating, userPrediction, isRestoring = false, preCalculatedAverage = null) {
     const resultsBox = document.getElementById(`results-${paperIndex}`);
     resultsBox.style.display = 'block';
     
-    // Listen for real-time updates to calculate average
+    // If we have a pre-calculated average (from first submission), use it for scoring immediately
+    if (preCalculatedAverage !== null) {
+        const scoreElement = document.getElementById(`score-${paperIndex}`);
+        if (!scoreElement.textContent) {
+            const difference = Math.abs(userPrediction - preCalculatedAverage);
+            const score = Math.max(0, 100 - Math.round(difference * 12));
+            totalScore += score;
+            
+            // Display score with detailed feedback
+            scoreElement.textContent = `${score}%`;
+            scoreElement.style.fontSize = '2rem';
+            scoreElement.style.fontWeight = 'bold';
+            scoreElement.style.color = score >= 88 ? '#10b981' : score >= 76 ? '#3b82f6' : score >= 64 ? '#f59e0b' : '#ef4444';
+            
+            const msgElement = document.getElementById(`score-msg-${paperIndex}`);
+            msgElement.innerHTML = 
+                difference === 0 ? `<strong>🎯 Perfect prediction!</strong><br>You nailed it: ${userPrediction} = ${preCalculatedAverage.toFixed(1)}` :
+                difference <= 0.5 ? `<strong>⭐ Outstanding!</strong><br>Predicted ${userPrediction}, actual ${preCalculatedAverage.toFixed(1)} — spot on!` :
+                difference <= 1 ? `<strong>🎪 Excellent work!</strong><br>Predicted ${userPrediction}, actual ${preCalculatedAverage.toFixed(1)} — very close!` :
+                difference <= 1.5 ? `<strong>👍 Great prediction!</strong><br>Predicted ${userPrediction}, actual ${preCalculatedAverage.toFixed(1)} — well done!` :
+                difference <= 2.5 ? `<strong>👌 Good attempt!</strong><br>Predicted ${userPrediction}, actual ${preCalculatedAverage.toFixed(1)} — getting there!` :
+                `<strong>💪 Keep learning!</strong><br>Predicted ${userPrediction}, actual ${preCalculatedAverage.toFixed(1)} — science perception is tricky!`;
+            msgElement.style.fontSize = '0.95rem';
+            msgElement.style.lineHeight = '1.5';
+            
+            // Update total score display with animation
+            const scoreDisplay = document.getElementById('total-score-header');
+            const scoreBanner = document.getElementById('score-banner');
+            if (scoreDisplay) {
+                const ratedCount = Object.keys(userRatings).length;
+                const percentageScore = ratedCount > 0 ? Math.round(totalScore / ratedCount) : 0;
+                if (percentageScore > 0) {
+                    const icon = getPerformanceIcon(percentageScore);
+                    scoreDisplay.innerHTML = `<span class="medal-icon">${icon}</span> ${percentageScore}%`;
+                    scoreDisplay.style.animation = 'scoreUpdate 0.5s ease';
+                    setTimeout(() => scoreDisplay.style.animation = '', 500);
+                    if (scoreBanner) scoreBanner.style.display = 'flex';
+                } else {
+                    if (scoreBanner) scoreBanner.style.display = 'none';
+                }
+            }
+            
+            // Update timer to reflect papers remaining
+            updateTimerDisplay();
+            
+            // Save state after score update
+            saveState();
+            
+            // Check if user has rated at least 12 studies
+            const totalRated = Object.keys(userRatings).length;
+            if (totalRated >= 12 && paperIndex < papers.length - 1) {
+                // Show Finish button
+                const finishBtn = document.getElementById(`finish-btn-${paperIndex}`);
+                if (finishBtn) {
+                    finishBtn.style.display = 'block';
+                }
+            }
+        }
+    }
+    
+    // Listen for real-time updates to display current average
     const ratingsRef = ref(database, `ratings/${paperId}`);
     const unsubscribe = onValue(ratingsRef, (snapshot) => {
         const ratings = snapshot.val();
@@ -894,13 +1177,12 @@ async function showResults(paperIndex, paperId, userRating, userPrediction, isRe
         if (ratings) {
             const ratingValues = Object.values(ratings).map(r => r.rating);
             
-            // Include seed score in average calculation (weighted as 10 participants)
+            // Include seed score in average calculation (weighted as 100 participants)
             const seedScore = seedScores[paperId] || 4;
             const totalRatings = ratingValues.reduce((a, b) => a + b, 0) + (seedScore * seedWeight);
             const totalCount = ratingValues.length + seedWeight;
             const average = totalRatings / totalCount;
-            const participantCount = ratingValues.length;
-            const totalParticipants = totalCount; // Include seed weight in display
+            const participantCount = ratingValues.length; // Actual human participants only
             
             // Update display with ordinal color scale
             const avgRounded = Math.round(average);
@@ -908,7 +1190,7 @@ async function showResults(paperIndex, paperId, userRating, userPrediction, isRe
             const avgRatingScale = document.getElementById(`avg-rating-scale-${paperIndex}`);
             
             if (yourRatingScale && avgRatingScale) {
-                // Clear previous highlights
+                // Clear all cells first - set default grey appearance
                 yourRatingScale.querySelectorAll('.scale-cell').forEach(cell => {
                     cell.textContent = '';
                     cell.className = 'scale-cell';
@@ -918,14 +1200,14 @@ async function showResults(paperIndex, paperId, userRating, userPrediction, isRe
                     cell.className = 'scale-cell';
                 });
                 
-                // Highlight user rating
+                // Highlight user rating only
                 const yourCell = yourRatingScale.querySelector(`[data-value="${userRating}"]`);
                 if (yourCell) {
                     yourCell.textContent = userRating;
                     yourCell.className = `scale-cell active rating-${userRating}`;
                 }
                 
-                // Highlight average rating
+                // Highlight average rating only
                 const avgCell = avgRatingScale.querySelector(`[data-value="${avgRounded}"]`);
                 if (avgCell) {
                     avgCell.textContent = average.toFixed(1);
@@ -934,7 +1216,7 @@ async function showResults(paperIndex, paperId, userRating, userPrediction, isRe
             }
             
             document.getElementById(`count-${paperIndex}`).textContent = 
-                `Based on ${totalParticipants} participant${totalParticipants !== 1 ? 's' : ''}`;
+                `Based on ${participantCount} participant${participantCount !== 1 ? 's' : ''}`;
             
             // Calculate score based on prediction accuracy
             // Skip recalculation if already calculated (score element has content) or if restoring from saved state
@@ -964,12 +1246,19 @@ async function showResults(paperIndex, paperId, userRating, userPrediction, isRe
                 
                 // Update total score display with animation
                 const scoreDisplay = document.getElementById('total-score-header');
+                const scoreBanner = document.getElementById('score-banner');
                 if (scoreDisplay) {
-                    const totalPapers = papers.length || 23;
-                    const percentageScore = Math.round((totalScore / (totalPapers * 100)) * 100);
-                    scoreDisplay.innerHTML = `<span class="medal-icon">🏆</span> ${percentageScore}%`;
-                    scoreDisplay.style.animation = 'scoreUpdate 0.5s ease';
-                    setTimeout(() => scoreDisplay.style.animation = '', 500);
+                    const ratedCount = Object.keys(userRatings).length;
+                    const percentageScore = ratedCount > 0 ? Math.round(totalScore / ratedCount) : 0;
+                    if (percentageScore > 0) {
+                        const icon = getPerformanceIcon(percentageScore);
+                        scoreDisplay.innerHTML = `<span class="medal-icon">${icon}</span> ${percentageScore}%`;
+                        scoreDisplay.style.animation = 'scoreUpdate 0.5s ease';
+                        setTimeout(() => scoreDisplay.style.animation = '', 500);
+                        if (scoreBanner) scoreBanner.style.display = 'flex';
+                    } else {
+                        if (scoreBanner) scoreBanner.style.display = 'none';
+                    }
                 }
                 
                 // Update timer to reflect papers remaining
@@ -977,6 +1266,16 @@ async function showResults(paperIndex, paperId, userRating, userPrediction, isRe
                 
                 // Save state after score update
                 saveState();
+                
+                // Check if user has rated at least 12 studies
+                const totalRated = Object.keys(userRatings).length;
+                if (totalRated >= 12 && paperIndex < papers.length - 1) {
+                    // Show Finish button
+                    const finishBtn = document.getElementById(`finish-btn-${paperIndex}`);
+                    if (finishBtn) {
+                        finishBtn.style.display = 'block';
+                    }
+                }
             }
         }
     });
@@ -1035,12 +1334,10 @@ window.addEventListener('keydown', function(event) {
 
 // Show final results and leaderboard
 function showFinalResults() {
-    // Display final score as percentage
-    const totalPapers = papers.length || 23;
-    const percentageScore = Math.round((totalScore / (totalPapers * 100)) * 100);
+    // Display final score as average prediction accuracy percentage
+    const ratedCount = Object.keys(userRatings).length;
+    const percentageScore = ratedCount > 0 ? Math.round(totalScore / ratedCount) : 0;
     document.getElementById('final-score').textContent = `${percentageScore}%`;
-    
-    console.log('Saving to leaderboard:', { sessionId, totalScore, userName });
     
     // Save score to leaderboard
     const scoresRef = ref(database, `leaderboard/${sessionId}`);
@@ -1051,16 +1348,22 @@ function showFinalResults() {
         userName: userName,
         listId: assignedListId
     }).then(() => {
-        console.log('Score saved successfully');
+        // Show link copying and email buttons after save
+        document.getElementById('save-results-link').style.display = 'inline-block';
+        document.getElementById('email-results-link').style.display = 'inline-block';
+        // Display username inline
+        document.getElementById('username-display-inline').textContent = userName;
     }).catch((error) => {
         console.error('Error saving score:', error);
     });
+    
+    // Calculate rating analysis comparing user to crowd
+    calculateRatingAnalysis();
     
     // Load and display leaderboard
     const leaderboardRef = ref(database, 'leaderboard');
     onValue(leaderboardRef, (snapshot) => {
         const scores = snapshot.val();
-        console.log('Leaderboard data:', scores);
         
         if (scores) {
             const scoresArray = Object.entries(scores).map(([id, data]) => ({
@@ -1097,3 +1400,302 @@ function showFinalResults() {
         }
     });
 }
+
+// Calculate and display personalized rating analysis
+async function calculateRatingAnalysis() {
+    try {
+        // Collect average ratings for all papers
+        const ratingsData = {};
+        const analysisPromises = papers.map(async (paper) => {
+            const ratingsRef = ref(database, `ratings/${paper.id}`);
+            const snapshot = await get(ratingsRef);
+            const ratings = snapshot.val();
+            
+            if (ratings) {
+                const ratingValues = Object.values(ratings).map(r => r.rating);
+                // Include seed scores
+                const seedScore = seedScores[paper.id] || 4;
+                const totalRatings = ratingValues.reduce((a, b) => a + b, 0) + (seedScore * seedWeight);
+                const totalCount = ratingValues.length + seedWeight;
+                const average = totalRatings / totalCount;
+                
+                ratingsData[paper.id] = {
+                    average: average,
+                    userRating: userRatings[paper.id] || null
+                };
+            }
+        });
+        
+        await Promise.all(analysisPromises);
+        
+        // Calculate deviations
+        const deviations = [];
+        const userRatingsArr = [];
+        const avgRatingsArr = [];
+        const paperLabels = [];
+        
+        papers.forEach((paper) => {
+            if (ratingsData[paper.id] && ratingsData[paper.id].userRating !== null) {
+                const userRating = ratingsData[paper.id].userRating;
+                const avgRating = ratingsData[paper.id].average;
+                const deviation = userRating - avgRating;
+                
+                deviations.push(deviation);
+                userRatingsArr.push(userRating);
+                avgRatingsArr.push(avgRating);
+                paperLabels.push(paper.id);
+            }
+        });
+        
+        if (deviations.length === 0) {
+            return; // Not enough data
+        }
+        
+        // Calculate statistics
+        const meanDeviation = deviations.reduce((a, b) => a + b, 0) / deviations.length;
+        const variance = deviations.reduce((a, d) => a + Math.pow(d - meanDeviation, 2), 0) / deviations.length;
+        const stdDev = Math.sqrt(variance);
+        const absDeviations = deviations.map(d => Math.abs(d));
+        const meanAbsDeviation = absDeviations.reduce((a, b) => a + b, 0) / absDeviations.length;
+        
+        // Generate personalized summary
+        let summaryText = '';
+        
+        if (meanAbsDeviation < 0.5 && stdDev < 0.8) {
+            // Very close to average
+            summaryText = `🎯 <strong>Spot-On Evaluator!</strong> Your ratings are remarkably well-aligned with the crowd. On average, you deviated by just ${meanAbsDeviation.toFixed(2)} points from other participants' ratings. Your assessments are well backed by both the baseline quality indicators and the collective wisdom of other evaluators. You're in sync with the scientific consensus!`;
+        } else if (meanAbsDeviation < 1.0 && stdDev < 1.5) {
+            // Close to average
+            summaryText = `✓ <strong>Calibrated Scientist.</strong> Your ratings align well with the crowd, averaging ${meanAbsDeviation.toFixed(2)} points from the consensus. You're consistently backed by other participants' evaluations, showing you've developed a reliable eye for research quality that matches the collective assessment.`;
+        } else if (meanAbsDeviation > 2.0 || stdDev > 2.5) {
+            // Very different from average
+            summaryText = `🌟 <strong>Breaking the Mould!</strong> Your ratings deviate substantially from the crowd (average difference: ${meanAbsDeviation.toFixed(2)} points). You're seeing research quality through a unique lens—perhaps you're more critical of methodological flaws, or more generous with preliminary findings. Your independent perspective challenges the consensus!`;
+        } else {
+            // Moderately different
+            summaryText = `⚖️ <strong>Balanced Contrarian.</strong> Your ratings show notable differences from the average (typical deviation: ${meanAbsDeviation.toFixed(2)} points). You're neither slavishly following the crowd nor wildly divergent—you're bringing a thoughtful, independent perspective whilst still engaging with the scientific consensus.`;
+        }
+        
+        document.getElementById('analysis-summary').innerHTML = summaryText;
+        document.getElementById('rating-analysis').style.display = 'block';
+        
+        // Create comparison chart
+        createComparisonChart(paperLabels, userRatingsArr, avgRatingsArr);
+        
+    } catch (error) {
+        console.error('Error calculating rating analysis:', error);
+    }
+}
+
+// Create Chart.js visualization comparing user ratings to average
+function createComparisonChart(labels, userRatings, avgRatings) {
+    const ctx = document.getElementById('comparison-chart');
+    if (!ctx) return;
+    
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Your Ratings',
+                    data: userRatings,
+                    borderColor: '#667eea',
+                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                    borderWidth: 3,
+                    pointRadius: 5,
+                    pointBackgroundColor: '#667eea',
+                    tension: 0
+                },
+                {
+                    label: 'Crowd Average',
+                    data: avgRatings,
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    borderWidth: 2,
+                    borderDash: [5, 5],
+                    pointRadius: 4,
+                    pointBackgroundColor: '#10b981',
+                    tension: 0
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            aspectRatio: 2,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: {
+                        font: {
+                            size: 12,
+                            weight: 'bold'
+                        }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.dataset.label}: ${context.parsed.y.toFixed(2)}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    min: 1,
+                    max: 7,
+                    title: {
+                        display: true,
+                        text: 'Rating (1-7 scale)',
+                        font: {
+                            size: 14,
+                            weight: 'bold'
+                        }
+                    },
+                    ticks: {
+                        stepSize: 1
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Studies',
+                        font: {
+                            size: 14,
+                            weight: 'bold'
+                        }
+                    },
+                    ticks: {
+                        maxRotation: 45,
+                        minRotation: 45,
+                        font: {
+                            size: 9
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Copy results link to clipboard
+function copyResultsLink() {
+    const resultsUrl = `${window.location.origin}${window.location.pathname}?session=${sessionId}`;
+    navigator.clipboard.writeText(resultsUrl).then(() => {
+        document.getElementById('link-copied-msg').style.display = 'block';
+        setTimeout(() => {
+            document.getElementById('link-copied-msg').style.display = 'none';
+        }, 3000);
+    }).catch(err => {
+        console.error('Failed to copy link:', err);
+        alert('Failed to copy link. Please copy manually: ' + resultsUrl);
+    });
+}
+
+window.copyResultsLink = copyResultsLink;
+
+// Email results link to user
+function emailResultsLink() {
+    const resultsUrl = `${window.location.origin}${window.location.pathname}?session=${sessionId}`;
+    const dashboardUrl = `${window.location.origin}/dashboard.html`;
+    
+    const subject = encodeURIComponent('Your Unlock the Lab Results');
+    const body = encodeURIComponent(
+        `Hello ${userName},\n\n` +
+        `Here are your Unlock the Lab workshop results:\n\n` +
+        `Your Username: ${userName}\n\n` +
+        `Direct Link to Your Results:\n${resultsUrl}\n\n` +
+        `You can also visit the Live Dashboard and enter your username to find your results:\n${dashboardUrl}\n\n` +
+        `The dashboard shows real-time statistics and comparisons for all participants.\n\n` +
+        `Thank you for participating!\n\n` +
+        `---\n` +
+        `Unlock the Lab Workshop\n` +
+        `Dr Pablo Bernabeu, University of Oxford`
+    );
+    
+    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+}
+
+window.emailResultsLink = emailResultsLink;
+
+// Load and display results for a specific session
+async function loadSessionResults(targetSessionId) {
+    try {
+        // Load basic content first
+        await loadContent();
+        
+        // Helper function to normalize username for comparison
+        const normalizeUsername = (username) => {
+            return username.toLowerCase().replace(/\s+/g, '');
+        };
+        
+        // Try direct lookup first
+        let leaderboardRef = ref(database, `leaderboard/${targetSessionId}`);
+        let snapshot = await get(leaderboardRef);
+        let actualSessionId = targetSessionId;
+        
+        // If not found, try fuzzy matching with normalized spaces
+        if (!snapshot.exists()) {
+            const normalizedInput = normalizeUsername(targetSessionId);
+            const allLeaderboardRef = ref(database, 'leaderboard');
+            const allSnapshot = await get(allLeaderboardRef);
+            
+            if (allSnapshot.exists()) {
+                const allData = allSnapshot.val();
+                // Find a matching username (case-insensitive, space-insensitive)
+                const matchingKey = Object.keys(allData).find(key => 
+                    normalizeUsername(key) === normalizedInput
+                );
+                
+                if (matchingKey) {
+                    actualSessionId = matchingKey;
+                    leaderboardRef = ref(database, `leaderboard/${matchingKey}`);
+                    snapshot = await get(leaderboardRef);
+                }
+            }
+        }
+        
+        if (!snapshot.exists()) {
+            alert('Username not found. Please check your username and try again.');
+            window.location.href = window.location.pathname; // Remove query params
+            return;
+        }
+        
+        const sessionData = snapshot.val();
+        sessionId = actualSessionId; // Use the actual matched session ID
+        userName = sessionData.userName || 'Anonymous';
+        totalScore = sessionData.score || 0;
+        
+        // Load user's ratings from Firebase
+        const ratingsPromises = papers.map(async (paper) => {
+            const ratingRef = ref(database, `ratings/${paper.id}/${actualSessionId}`);
+            const ratingSnap = await get(ratingRef);
+            if (ratingSnap.exists()) {
+                const data = ratingSnap.val();
+                userRatings[paper.id] = data.rating;
+                userPredictions[paper.id] = data.prediction;
+            }
+        });
+        
+        await Promise.all(ratingsPromises);
+        
+        // Show final results page
+        document.getElementById('page-welcome').classList.remove('active');
+        document.getElementById('page-final').classList.add('active');
+        
+        // Display results
+        showFinalResults();
+        
+        // Update page title
+        document.getElementById('total-papers').textContent = Object.keys(userRatings).length;
+        
+    } catch (error) {
+        console.error('Error loading session results:', error);
+        alert('Error loading results. Please try again.');
+        window.location.href = window.location.pathname;
+    }
+}
+

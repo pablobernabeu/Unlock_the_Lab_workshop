@@ -15,7 +15,7 @@ If the backup workflow runs but no data appears in this folder, it's likely beca
 
 ### Solution: Enable Public Reads in Firebase
 
-Since all workshop data is anonymized (no personal information), you can safely enable public read access:
+Since all workshop data is anonymised (no personal information), you can safely enable public read access:
 
 1. Go to [Firebase Console](https://console.firebase.google.com/)
 2. Select your project: `unlock-the-lab-workshop`
@@ -43,7 +43,7 @@ Since all workshop data is anonymized (no personal information), you can safely 
 
 5. Click **Publish**
 
-This allows anyone to read the data (which is safe since it's anonymized workshop data), but only authenticated users in your app can write new ratings.
+This allows anyone to read the data (which is safe since it's anonymised workshop data), but only authenticated users in your app can write new ratings.
 
 ### Alternative: Authenticated Backup
 

@@ -18,6 +18,7 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.3);
         }
 
         .container {
@@ -34,7 +35,7 @@
         }
 
         h1 {
-            color: #667eea;
+            color: #20B2AA;
             font-size: 2rem;
             margin-bottom: 10px;
         }
@@ -77,7 +78,7 @@
         .stat-value {
             font-size: 2.5rem;
             font-weight: bold;
-            color: #667eea;
+            color: #20B2AA;
         }
 
         .stat-label {
@@ -101,7 +102,7 @@
         }
 
         .chart-card h2 {
-            color: #667eea;
+            color: #20B2AA;
             font-size: 1.3rem;
             margin-bottom: 20px;
         }
@@ -133,7 +134,7 @@
 
         th {
             background: #f9fafb;
-            color: #667eea;
+            color: #20B2AA;
             font-weight: 600;
             cursor: pointer;
             user-select: none;
@@ -155,12 +156,12 @@
 
         th.sort-asc::after {
             content: '↑';
-            color: #667eea;
+            color: #20B2AA;
         }
 
         th.sort-desc::after {
             content: '↓';
-            color: #667eea;
+            color: #20B2AA;
         }
 
         tbody tr:hover {
@@ -213,7 +214,7 @@
         }
 
         .admin-panel h3 {
-            color: #667eea;
+            color: #20B2AA;
             margin-bottom: 20px;
             font-size: 1.5rem;
         }
@@ -229,7 +230,7 @@
 
         .admin-input:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #20B2AA;
         }
 
         .admin-timer {
@@ -311,6 +312,16 @@
             h1 {
                 font-size: 1.5rem;
             }
+            
+            #leaderboardGrid {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            #leaderboardGrid {
+                grid-template-columns: 1fr !important;
+            }
         }
         
         /* Study Details Modal */
@@ -356,10 +367,10 @@
         }
         
         .leaderboard-tab:hover {
-            color: #667eea !important;
+            color: #20B2AA !important;
         }
     </style>
-  <script type="module" crossorigin src="/assets/dashboard-Bkk6Grsd.js"></script>
+  <script type="module" crossorigin src="/assets/dashboard-D0inix6Y.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
 </head>
 <body>
@@ -384,11 +395,6 @@
                 <p style="font-size: 0.75rem; color: #9ca3af; margin-top: 0.5rem;">Number of study ratings submitted by all participants</p>
             </div>
             <div class="stat-card">
-                <div class="stat-value" id="completedSessions">0</div>
-                <div class="stat-label">Completed Sessions</div>
-                <p style="font-size: 0.75rem; color: #9ca3af; margin-top: 0.5rem;">Total participants who finished all studies</p>
-            </div>
-            <div class="stat-card">
                 <div class="stat-value" id="uniqueParticipants">0</div>
                 <div class="stat-label">Participants</div>
                 <p style="font-size: 0.75rem; color: #9ca3af; margin-top: 0.5rem;">Total number of different users who have submitted ratings</p>
@@ -400,18 +406,49 @@
             </div>
         </div>
 
+        <!-- Review Your Results Section -->
+        <div id="results-access-section" class="stat-card" style="margin-bottom: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; text-shadow: 0 1px 3px rgba(0,0,0,0.3);">
+            <h2 style="color: white; margin-bottom: 15px; font-weight: 600;">📊 Review Your Results</h2>
+            <p style="margin-bottom: 15px; font-size: 0.95rem; font-weight: 400;">Completed the workshop? Enter your username below to view your personalised results page.</p>
+            <div id="results-link-display" style="display: none; padding: 15px; background: rgba(255,255,255,0.2); border-radius: 8px; margin-bottom: 10px;">
+                <p style="margin-bottom: 10px; font-size: 0.9rem;">Your session was detected!</p>
+                <button onclick="goToMyResults()" style="padding: 12px 24px; background: white; color: #667eea; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.2s;">
+                    🔍 View my results
+                </button>
+            </div>
+            <div id="results-manual-entry">
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <input type="text" id="sessionLinkInput" placeholder="Enter your username..." style="flex: 1; min-width: 250px; max-width: 400px; padding: 12px; border: 2px solid rgba(255,255,255,0.3); border-radius: 8px; font-size: 0.95rem; background: rgba(255,255,255,0.9);">
+                    <button onclick="loadFromLink()" style="padding: 12px 24px; background: white; color: #667eea; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.2s; white-space: nowrap;">
+                        🔍 View my results
+                    </button>
+                </div>
+                <p id="link-error" style="display: none; color: #fecaca; font-size: 0.85rem; margin-top: 10px;">⚠️ Please enter a valid username.</p>
+            </div>
+        </div>
+
+        <!-- SECTION 1: PREDICTION PERFORMANCE -->
+        <div style="margin-bottom: 2rem; padding: 1.5rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 12px; color: white;">
+            <h2 style="margin-top: 0; color: white; font-size: 1.8rem; border-bottom: 2px solid rgba(255,255,255,0.3); padding-bottom: 0.75rem;">
+                🎯 Part 1: Prediction Performance
+            </h2>
+            <p style="font-size: 1rem; margin-bottom: 0; opacity: 0.95;">
+                How well did participants predict what others would rate each study?
+            </p>
+        </div>
+
         <!-- Leaderboard Section -->
-        <div class="data-table" style="margin-bottom: 20px;">
-            <h2 style="color: #667eea; margin-bottom: 10px;">🏆 Leaderboard</h2>
-            <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 15px;">Top 200 performers ranked by prediction accuracy. Scores show how well participants predicted crowd ratings.</p>
+        <div class="data-table" style="margin-bottom: 40px;">
+            <h2 style="color: #059669; margin-bottom: 10px;">🏆 Top Predictors</h2>
+            <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 15px;">Top performers ranked by prediction accuracy. Scores show how well participants predicted crowd ratings.</p>
             
             <!-- Leaderboard Tabs -->
             <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #e5e7eb;">
-                <button id="tab24h" class="leaderboard-tab active" onclick="switchLeaderboardTab('24h')" style="padding: 10px 20px; border: none; background: none; color: #667eea; font-weight: bold; cursor: pointer; border-bottom: 3px solid #667eea; transition: all 0.2s;">
-                    📅 Past 24 Hours
+                <button id="tabAllTime" class="leaderboard-tab active" onclick="switchLeaderboardTab('allTime')" style="padding: 10px 20px; border: none; background: none; color: #059669; font-weight: bold; cursor: pointer; border-bottom: 3px solid #059669; transition: all 0.2s;">
+                    🌟 All-time leaders
                 </button>
-                <button id="tabAllTime" class="leaderboard-tab" onclick="switchLeaderboardTab('allTime')" style="padding: 10px 20px; border: none; background: none; color: #6b7280; font-weight: normal; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s;">
-                    🌟 All-Time Leaders
+                <button id="tab24h" class="leaderboard-tab" onclick="switchLeaderboardTab('24h')" style="padding: 10px 20px; border: none; background: none; color: #6b7280; font-weight: normal; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s;">
+                    📅 Past 24 hours
                 </button>
             </div>
             
@@ -420,9 +457,19 @@
             </div>
         </div>
 
+        <!-- SECTION 2: RATING PATTERNS -->
+        <div style="margin-bottom: 2rem; padding: 1.5rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; color: white; text-shadow: 0 1px 3px rgba(0,0,0,0.3);">
+            <h2 style="margin-top: 0; color: white; font-size: 1.8rem; border-bottom: 2px solid rgba(255,255,255,0.3); padding-bottom: 0.75rem; font-weight: 600;">
+                📊 Part 2: Rating Patterns
+            </h2>
+            <p style="font-size: 1rem; margin-bottom: 0; opacity: 0.95; font-weight: 400;">
+                How did participants actually rate the quality of each study?
+            </p>
+        </div>
+
         <div class="charts-grid">
             <div class="chart-card" style="grid-column: 1 / -1;">
-                <h2>📊 Average Ratings by Study</h2>
+                <h2>📊 Average Quality Ratings by Study</h2>
                 <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 1rem;">Mean quality rating (1-7 scale) with 95% confidence intervals. Error bars show rating variability—wider bars indicate less agreement among participants. <strong>Click on any bar to view detailed statistics and study information.</strong></p>
                 <div class="chart-container">
                     <canvas id="ratingsChart"></canvas>
@@ -431,8 +478,8 @@
         </div>
 
         <div class="data-table">
-            <h2 style="color: #667eea; margin-bottom: 10px;">📈 Detailed Statistics</h2>
-            <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 20px;">Complete breakdown of ratings for each study. Std Dev measures disagreement (higher = more variable ratings). Agreement % shows consensus level. Color scales highlight relative values. <strong>Click study names to view detailed information.</strong> Click column headers to sort.</p>
+            <h2 style="color: #20B2AA; margin-bottom: 10px;">📈 Detailed Rating Statistics</h2>
+            <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 20px;">Complete breakdown of how participants rated each study's quality. Std Dev measures disagreement (higher = more variable ratings). Agreement % shows consensus level. Color scales highlight relative values. <strong>Click study names to view detailed information.</strong> Click column headers to sort.</p>
             <table id="statsTable">
                 <thead>
                     <tr>
@@ -500,7 +547,7 @@
                 <div class="admin-timer" id="adminTimer">Time remaining: 10s</div>
                 <div class="admin-buttons">
                     <button class="btn-cancel" onclick="closeAdminPanel()">Cancel</button>
-                    <button class="btn-submit" onclick="verifyPassword()" id="loginBtn">Sign In</button>
+                    <button class="btn-submit" onclick="verifyPassword()" id="loginBtn">Sign in</button>
                 </div>
             </div>
 
@@ -509,9 +556,9 @@
                 
                 <!-- Firebase Usage Statistics (Admin Only) -->
                 <div style="margin-bottom: 20px; padding: 15px; background: #f8fafc; border: 2px solid #e5e7eb; border-radius: 8px;">
-                    <h4 style="color: #667eea; margin-bottom: 12px; font-size: 1rem;">📊 Firebase Usage (Free Tier Limits)</h4>
+                    <h4 style="color: #20B2AA; margin-bottom: 12px; font-size: 1rem;">📊 Firebase Usage (Free Tier Limits)</h4>
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
-                        <div style="padding: 12px; background: white; border-radius: 6px; border-left: 4px solid #667eea;">
+                        <div style="padding: 12px; background: white; border-radius: 6px; border-left: 4px solid #20B2AA;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                                 <span style="font-weight: 600; color: #374151; font-size: 0.85rem;">Connections</span>
                                 <span id="connectionUsage" style="font-size: 1.1rem; font-weight: bold; color: #10b981;">0/100</span>
@@ -534,7 +581,7 @@
                         <div style="padding: 12px; background: white; border-radius: 6px; border-left: 4px solid #f59e0b;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                                 <span style="font-weight: 600; color: #374151; font-size: 0.85rem;">Sessions</span>
-                                <span id="sessionCount" style="font-size: 1.1rem; font-weight: bold; color: #667eea;">0</span>
+                                <span id="sessionCount" style="font-size: 1.1rem; font-weight: bold; color: #20B2AA;">0</span>
                             </div>
                             <p style="font-size: 0.7rem; color: #6b7280; margin-top: 6px; margin-bottom: 0;">Completed</p>
                         </div>
@@ -544,11 +591,11 @@
                 
                 <div class="admin-actions">
                     <button class="btn-danger" onclick="endAllSessions()" id="endSessionsBtn">
-                        ⏹️ End All Active Sessions
+                        ⏹️ End all active sessions
                     </button>
                 </div>
                 <div class="admin-buttons" style="margin-top: 15px;">
-                    <button class="btn-cancel" onclick="adminSignOut()" style="background: #ef4444; color: white;">Sign Out</button>
+                    <button class="btn-cancel" onclick="adminSignOut()" style="background: #ef4444; color: white;">Sign out</button>
                     <button class="btn-cancel" onclick="closeAdminPanel()">Close</button>
                 </div>
             </div>
