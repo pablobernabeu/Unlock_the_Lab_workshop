@@ -59,7 +59,7 @@
                     
                     <div style="margin-top: 2rem; padding: 1.25rem; background: #fff3e0; border: 2px solid #ff9800; border-radius: 8px;">
                         <h3 style="margin-top: 0; color: #e65100; font-size: 1rem;">🏆 Leaderboard & Anonymous Usernames</h3>
-                        <p style="font-size: 0.9rem; line-height: 1.6; margin-bottom: 0.75rem;">Complete all studies to appear on the <strong>public leaderboard</strong> and see how your prediction accuracy compares with others!</p>
+                        <p style="font-size: 0.9rem; line-height: 1.6; margin-bottom: 0.75rem;">Rate at least <strong>12 papers</strong> to appear on the <strong>public leaderboard</strong>, and to review and compare your ratings with the crowd at the end.</p>
                         <ul style="font-size: 0.9rem; line-height: 1.6; margin: 0.75rem 0; padding-left: 1.5rem;">
                             <li>You'll be assigned a <strong>unique anonymous username</strong> (e.g., "Red Fox", "Wise Owl") automatically.</li>
                             <li>Your username will be displayed on the <strong>results page at the end</strong>.</li>
@@ -164,9 +164,6 @@
 
         <div class="page" id="page-final">
             <div class="container">
-                <div class="page-logo-header">
-                    <img id="final-logo" src="unlock-lab-icon.svg" alt="Logo" class="page-logo">
-                </div>
                 <h1>🎉 Workshop Complete!</h1>
                 
                 <div class="content">
@@ -192,7 +189,7 @@
                         <div class="leaderboard" style="background: rgba(255,255,255,0.95); border-radius: 8px; padding: 1.25rem; margin-top: 1.25rem;">
                             <h3 style="color: #059669; margin-top: 0; text-shadow: none;">🏆 Top Predictors</h3>
                             <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">
-                                See how your prediction accuracy compares to other participants
+                                See how your prediction accuracy compares to other participants (includes only participants who completed at least 12 ratings)
                             </p>
                             <div id="leaderboard-list">Loading...</div>
                         </div>
@@ -215,7 +212,7 @@
                             <div style="background: white; border-radius: 10px; padding: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin: 1rem 0;">
                                 <h3 style="color: #20B2AA; margin-top: 0; text-shadow: none;">Your Ratings vs. Crowd Average</h3>
                                 <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">
-                                    This chart shows how your quality ratings (purple line) compared to what other participants rated on average (green dashed line).
+                                    This chart shows how your quality ratings (purple line) compared to what other participants rated on average (green dashed line). Crowd data includes only participants who completed at least 12 ratings.
                                 </p>
                                 <div style="position: relative; height: 220px;">
                                     <canvas id="comparison-chart"></canvas>
