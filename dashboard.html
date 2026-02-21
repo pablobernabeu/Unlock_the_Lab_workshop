@@ -29,9 +29,40 @@
         header {
             background: white;
             border-radius: 12px;
-            padding: 20px 30px;
+            padding: 20px 30px 12px;
             margin-bottom: 20px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .dashboard-logo {
+            height: 1.8em;
+            vertical-align: middle;
+            margin-top: -0.15em;
+            cursor: pointer;
+            animation: logoShake 2s ease-in-out infinite;
+            transform-origin: center;
+        }
+
+        .dashboard-logo.shake-intense {
+            animation: logoShakeIntense 0.3s ease-in-out infinite;
+        }
+
+        @keyframes logoShake {
+            0% { transform: rotate(0deg); }
+            12.5% { transform: rotate(-4deg); }
+            25% { transform: rotate(-8deg); }
+            37.5% { transform: rotate(-4deg); }
+            50% { transform: rotate(0deg); }
+            62.5% { transform: rotate(4deg); }
+            75% { transform: rotate(8deg); }
+            87.5% { transform: rotate(4deg); }
+            100% { transform: rotate(0deg); }
+        }
+
+        @keyframes logoShakeIntense {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-15deg); }
+            75% { transform: rotate(15deg); }
         }
 
         h1 {
@@ -374,7 +405,7 @@
 <body>
     <div class="container">
         <header>
-            <h1><img src="unlock-lab-icon.svg" alt="Unlock the Lab" style="height: 1.8em; vertical-align: middle; margin-top: -0.15em;"> Unlock the Lab - Live Dashboard</h1>
+            <h1><img id="dashboard-logo" src="unlock-lab-icon.svg" alt="Unlock the Lab" class="dashboard-logo"> Unlock the Lab - Live Dashboard</h1>
         </header>
 
         <div class="stats-grid">
@@ -434,7 +465,7 @@
         <!-- Leaderboard Section -->
         <div class="data-table" style="margin-bottom: 40px;">
             <h2 style="color: #059669; margin-bottom: 10px;">🏆 Top Predictors</h2>
-            <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 15px;">Top performers ranked by prediction accuracy. Scores show how well participants predicted crowd ratings.</p>
+            <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 15px;">Top performers ranked by prediction accuracy. Scores show how well participants predicted crowd ratings. This leaderboard includes only participants who completed at least 12 ratings.</p>
             
             <!-- Leaderboard Tabs -->
             <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #e5e7eb;">
@@ -473,7 +504,7 @@
         <div class="charts-grid">
             <div class="chart-card" style="grid-column: 1 / -1;">
                 <h2>📊 Average Quality Ratings by Study</h2>
-                <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 1rem;">Mean quality rating (1-7 scale) with 95% confidence intervals. Error bars show rating variability—wider bars indicate less agreement among participants. <strong>Click on any bar to view detailed statistics and study information.</strong></p>
+                <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 1rem;">Mean quality rating (1-7 scale) with 95% confidence intervals. Error bars show rating variability—wider bars indicate less agreement among participants. Data includes only participants who completed at least 12 ratings. <strong>Click on any bar to view detailed statistics and study information.</strong></p>
                 <div class="chart-container">
                     <canvas id="ratingsChart"></canvas>
                 </div>
@@ -689,6 +720,16 @@
             // Show the auto-detected session UI
             document.getElementById('results-link-display').style.display = 'block';
             document.getElementById('results-manual-entry').style.display = 'none';
+        }
+
+        const dashboardLogo = document.getElementById('dashboard-logo');
+        if (dashboardLogo) {
+            setInterval(() => {
+                dashboardLogo.classList.add('shake-intense');
+                setTimeout(() => {
+                    dashboardLogo.classList.remove('shake-intense');
+                }, 2000);
+            }, 8000);
         }
 
         // Function to navigate to user's results page
