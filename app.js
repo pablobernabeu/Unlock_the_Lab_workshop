@@ -141,7 +141,7 @@ function setupLogoAnimation(logoId) {
     let hoverTimer = null;
     
     // Define drop types
-    const dropTypes = ['slime', 'slime-star', 'slime-heart', 'slime-sparkle', 'slime-bubble'];
+    const dropTypes = ['droplet', 'droplet-star', 'droplet-heart', 'droplet-sparkle', 'droplet-bubble'];
     
     // Trigger animation after 900ms of hover (desktop)
     logo.addEventListener('mouseenter', () => {
@@ -199,7 +199,7 @@ function setupLogoAnimation(logoId) {
             isAnimating = true;
             
             // Define drop types
-            const dropTypes = ['slime', 'slime-star', 'slime-heart', 'slime-sparkle', 'slime-bubble'];
+            const dropTypes = ['droplet', 'droplet-star', 'droplet-heart', 'droplet-sparkle', 'droplet-bubble'];
             
             // Check if this is a celebration animation
             const isCelebration = dropType === 'celebration';
@@ -232,12 +232,12 @@ function setupLogoAnimation(logoId) {
                     
                     // For celebration refills, use a special class that does not repeat the main animation
                     if (isCelebration) {
-                        refillDrop.className = 'slime slime-celebration-refill slime-refill';
+                        refillDrop.className = 'droplet droplet-celebration-refill droplet-refill';
                     } else if (dropType === 'mixed') {
                         const randomType = dropTypes[Math.floor(Math.random() * dropTypes.length)];
-                        refillDrop.className = `slime ${randomType} slime-refill`;
+                        refillDrop.className = `droplet ${randomType} droplet-refill`;
                     } else {
-                        refillDrop.className = `slime ${dropType} slime-refill`;
+                        refillDrop.className = `droplet ${dropType} droplet-refill`;
                     }
                     
                     // Start from random positions at top of screen, spread horizontally
@@ -255,7 +255,7 @@ function setupLogoAnimation(logoId) {
                     refillDrop.style.setProperty('--travel-distance', `${travelDistance}px`);
                     refillDrop.style.animationDelay = `${i * 45}ms`;
                     
-                    slimeContainer.appendChild(refillDrop);
+                    dropletContainer.appendChild(refillDrop);
                 }
                 }, 2500);
             } // End of refill section (skipped for celebration)
@@ -266,10 +266,10 @@ function setupLogoAnimation(logoId) {
                 logoElement.src = originalSrc;
             }, 3800);
             
-            // Create slime container
-            const slimeContainer = document.createElement('div');
-            slimeContainer.className = 'slime-container';
-            document.body.appendChild(slimeContainer);
+            // Create droplet container
+            const dropletContainer = document.createElement('div');
+            dropletContainer.className = 'droplet-container';
+            document.body.appendChild(dropletContainer);
             
             // Get logo position
             const logoRect = logoElement.getBoundingClientRect();
@@ -284,17 +284,17 @@ function setupLogoAnimation(logoId) {
             
             // Create drops boiling out from upper right corner
             for (let i = 0; i < dropCount; i++) {
-                const slime = document.createElement('div');
+                const droplet = document.createElement('div');
                 
                 // Assign drop class based on type
                 if (isCelebration) {
-                    slime.className = 'slime slime-celebration';
+                    droplet.className = 'droplet droplet-celebration';
                 } else if (dropType === 'mixed') {
                     // Randomly pick a drop type
                     const randomType = dropTypes[Math.floor(Math.random() * dropTypes.length)];
-                    slime.className = `slime ${randomType}`;
+                    droplet.className = `droplet ${randomType}`;
                 } else {
-                    slime.className = `slime ${dropType}`;
+                    droplet.className = `droplet ${dropType}`;
                 }
                 
                 // Small random spread around upper right corner
@@ -307,13 +307,13 @@ function setupLogoAnimation(logoId) {
                 const size = isCelebration ? 1.5 + Math.random() : 1 + Math.random() * 0.5;
                 const delay = i * (isCelebration ? 40 : 50); // Faster stagger for celebration
                 
-                slime.style.left = `${upperRightX + jitterX}px`;
-                slime.style.top = `${upperRightY + jitterY}px`;
-                slime.style.width = `${size}vw`;
-                slime.style.height = `${size * 1.2}vw`;
-                slime.style.animationDelay = `${delay}ms`;
+                droplet.style.left = `${upperRightX + jitterX}px`;
+                droplet.style.top = `${upperRightY + jitterY}px`;
+                droplet.style.width = `${size}vw`;
+                droplet.style.height = `${size * 1.2}vw`;
+                droplet.style.animationDelay = `${delay}ms`;
                 
-                slimeContainer.appendChild(slime);
+                dropletContainer.appendChild(droplet);
             }
             
             // After flip (600ms), create drops from bottom left corner
@@ -323,16 +323,16 @@ function setupLogoAnimation(logoId) {
                 const bottomLeftY = updatedRect.top + updatedRect.height;
                 
                 for (let i = 0; i < dropCount; i++) {
-                    const slime = document.createElement('div');
+                    const droplet = document.createElement('div');
                     
                     // Assign drop class based on type
                     if (isCelebration) {
-                        slime.className = 'slime slime-celebration';
+                        droplet.className = 'droplet droplet-celebration';
                     } else if (dropType === 'mixed') {
                         const randomType = dropTypes[Math.floor(Math.random() * dropTypes.length)];
-                        slime.className = `slime ${randomType}`;
+                        droplet.className = `droplet ${randomType}`;
                     } else {
-                        slime.className = `slime ${dropType}`;
+                        droplet.className = `droplet ${dropType}`;
                     }
                     
                     const jitterX = isCelebration 
@@ -342,19 +342,19 @@ function setupLogoAnimation(logoId) {
                     // Use viewport-relative sizing for growth
                     const size = isCelebration ? 1.5 + Math.random() : 1 + Math.random() * 0.5;
                     
-                    slime.style.left = `${bottomLeftX + jitterX}px`;
-                    slime.style.top = `${bottomLeftY + jitterY}px`;
-                    slime.style.width = `${size}vw`;
-                    slime.style.height = `${size * 1.2}vw`;
+                    droplet.style.left = `${bottomLeftX + jitterX}px`;
+                    droplet.style.top = `${bottomLeftY + jitterY}px`;
+                    droplet.style.width = `${size}vw`;
+                    droplet.style.height = `${size * 1.2}vw`;
                     
-                    slimeContainer.appendChild(slime);
+                    dropletContainer.appendChild(droplet);
                 }
             }, 600);
             
             // Clean up after animation completes
             setTimeout(() => {
                 logoElement.classList.remove('flipping');
-                slimeContainer.remove();
+                dropletContainer.remove();
                 if (dropType !== 'celebration') {
                     isAnimating = false;
                 } else {
