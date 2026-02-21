@@ -451,6 +451,15 @@
             </div>
         </div>
 
+        <!-- SECTION 1b: CRITERION IMPORTANCE -->
+        <div class="data-table" style="margin-bottom: 40px;">
+            <h2 style="color: #d97706; margin-bottom: 10px;">⚖️ Criterion Importance</h2>
+            <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 20px;">Average percentage of tokens assigned to each criterion by participants, reflecting what they considered most important when evaluating study quality.</p>
+            <div id="criterion-importance-container">
+                <p style="text-align: center; color: #999; padding: 2rem 0;">No data yet.</p>
+            </div>
+        </div>
+
         <!-- SECTION 2: RATING PATTERNS -->
         <div style="margin-bottom: 2rem; padding: 1.5rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; color: white; text-shadow: 0 1px 3px rgba(0,0,0,0.3);">
             <h2 style="margin-top: 0; color: white; font-size: 1.8rem; border-bottom: 2px solid rgba(255,255,255,0.3); padding-bottom: 0.75rem; font-weight: 600;">
@@ -1109,6 +1118,7 @@
         let ratingsData = {};
         let activeData = {};
         let leaderboardData = {};
+        let rankingsData = {};
 
         onValue(ref(database, 'ratings'), (snapshot) => {
             ratingsData = snapshot.val() || {};
@@ -1124,6 +1134,62 @@
             leaderboardData = snapshot.val() || {};
             updateDashboard(ratingsData, activeData, leaderboardData);
         });
+
+        onValue(ref(database, 'rankings'), (snapshot) => {
+            rankingsData = snapshot.val() || {};
+            updateCriterionImportance(rankingsData);
+        });
+
+        // Criterion importance visualisation
+        const CRITERIA_KEYS = [
+            { key: 'title',      label: '📰 Title' },
+            { key: 'access',     label: '📚 Access' },
+            { key: 'source',     label: '🏛️ Source' },
+            { key: 'theory',     label: '🔬 Theory' },
+            { key: 'methods',    label: '📊 Methods & Data' },
+            { key: 'conclusion', label: '📝 Conclusion' }
+        ];
+
+        function updateCriterionImportance(data) {
+            const container = document.getElementById('criterion-importance-container');
+            if (!container) return;
+
+            const entries = Object.values(data || {});
+            if (entries.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #999; padding: 2rem 0;">No data yet.</p>';
+                return;
+            }
+
+            // Sum tokens per criterion across all participants
+            const totals = { title: 0, access: 0, source: 0, theory: 0, methods: 0, conclusion: 0 };
+            entries.forEach(entry => {
+                CRITERIA_KEYS.forEach(c => {
+                    totals[c.key] += (entry[c.key] || 0);
+                });
+            });
+
+            const grandTotal = Object.values(totals).reduce((a, b) => a + b, 0);
+            const n = entries.length;
+
+            // Build bar chart
+            container.innerHTML = `
+                <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 1rem;">Based on ${n} participant${n !== 1 ? 's' : ''}</p>
+                ${CRITERIA_KEYS.map(c => {
+                    const pct = grandTotal > 0 ? Math.round((totals[c.key] / grandTotal) * 100) : 0;
+                    const avgTokens = (totals[c.key] / n).toFixed(1);
+                    return `
+                        <div style="margin-bottom: 0.9rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+                                <span style="font-weight: 600; font-size: 0.9rem;">${c.label}</span>
+                                <span style="font-weight: 700; color: #d97706; font-size: 0.9rem;">${pct}% <span style="font-weight: 400; color: #9ca3af; font-size: 0.8rem;">(avg ${avgTokens}/20)</span></span>
+                            </div>
+                            <div style="background: #e5e7eb; border-radius: 4px; height: 14px; overflow: hidden;">
+                                <div style="width: ${pct}%; height: 100%; background: linear-gradient(90deg, #f59e0b, #d97706); border-radius: 4px;"></div>
+                            </div>
+                        </div>`;
+                }).join('')}
+            `;
+        }
 
         // Admin Panel Functions
         let adminTimer;
@@ -1275,21 +1341,27 @@
         window.deleteAllRatingsData = async function() {
             const ratingsRef = ref(database, 'ratings');
             const leaderboardRef = ref(database, 'leaderboard');
+            const rankingsRef = ref(database, 'rankings');
             
             try {
-                const ratingsSnapshot = await get(ratingsRef);
-                const leaderboardSnapshot = await get(leaderboardRef);
+                const [ratingsSnapshot, leaderboardSnapshot, rankingsSnapshot] = await Promise.all([
+                    get(ratingsRef),
+                    get(leaderboardRef),
+                    get(rankingsRef)
+                ]);
                 
                 const hasRatings = ratingsSnapshot.exists();
                 const hasLeaderboard = leaderboardSnapshot.exists();
+                const hasRankings = rankingsSnapshot.exists();
                 
-                if (!hasRatings && !hasLeaderboard) {
+                if (!hasRatings && !hasLeaderboard && !hasRankings) {
                     alert('ℹ️ No data to delete.');
                     return;
                 }
                 
                 let totalRatings = 0;
                 let totalParticipants = 0;
+                let totalRankings = 0;
                 
                 if (hasRatings) {
                     const ratings = ratingsSnapshot.val();
@@ -1302,7 +1374,11 @@
                     totalParticipants = Object.keys(leaderboardSnapshot.val()).length;
                 }
                 
-                const confirmMsg = `⚠️ WARNING: You are about to permanently delete:\n• ${totalRatings} rating(s)\n• ${totalParticipants} participant(s) from leaderboard\n\nThis action CANNOT be undone!\n\nType "DELETE" to confirm:`;
+                if (hasRankings) {
+                    totalRankings = Object.keys(rankingsSnapshot.val()).length;
+                }
+                
+                const confirmMsg = `⚠️ WARNING: You are about to permanently delete:\n• ${totalRatings} rating(s)\n• ${totalParticipants} participant(s) from leaderboard\n• ${totalRankings} criterion ranking(s)\n\nThis action CANNOT be undone!\n\nType "DELETE" to confirm:`;
                 const userInput = prompt(confirmMsg);
                 
                 if (userInput !== 'DELETE') {
@@ -1314,13 +1390,14 @@
                 btn.disabled = true;
                 btn.textContent = 'Deleting data...';
                 
-                // Delete both ratings and leaderboard
+                // Delete ratings, leaderboard, and rankings
                 await Promise.all([
                     hasRatings ? remove(ratingsRef) : Promise.resolve(),
-                    hasLeaderboard ? remove(leaderboardRef) : Promise.resolve()
+                    hasLeaderboard ? remove(leaderboardRef) : Promise.resolve(),
+                    hasRankings ? remove(rankingsRef) : Promise.resolve()
                 ]);
                 
-                alert('✅ All ratings and leaderboard data has been permanently deleted.');
+                alert('✅ All data has been permanently deleted.');
                 
                 // Reload the page to refresh all data
                 window.location.reload();

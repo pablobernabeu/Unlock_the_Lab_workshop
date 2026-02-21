@@ -1,0 +1,27 @@
+{
+  "rules": {
+    ".read": true,
+    "ratings": {
+      "$paperId": {
+        "$sessionId": {
+          ".write": true
+        }
+      }
+    },
+    "leaderboard": {
+      "$sessionId": {
+        ".write": true
+      }
+    },
+    "rankings": {
+      "$sessionId": {
+        ".write": true
+      }
+    },
+    "active": {
+      "$sessionId": {
+        ".write": true
+      }
+    }
+  }
+}

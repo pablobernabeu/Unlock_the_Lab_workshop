@@ -2,7 +2,7 @@
   {
     "id": "STUDY-1",
     "title": "The impact of chocolate-based breakfasts on mathematical performance in school-aged children",
-    "access": "Accessible only via a £35 paywall on the publisher's site.",
+    "access": "Freely accessible online (Open Access). The journal charges authors a publication fee rather than readers — a common model in predatory publishing that creates the appearance of openness while bypassing rigorous peer review.",
     "overview": "The study relies on the simplified premise that glucose provides immediate fuel for the brain. However, it fails to engage with the substantial body of existing literature describing the ‘sugar crash’ effect and the impact of sustained energy release on cognitive concentration.",
     "methods": "The researchers observed <i>N</i>=12 children in a single classroom for three days. There was no control group (e.g., children eating a standard breakfast) to compare against. Data availability: The authors state that raw data and individual test scores are ‘not shared due to commercial sensitivity regarding the chocolate brand involved.’",
     "conclusion": "The authors conclude that chocolate should be mandatory in school breakfasts to improve national grades. This is a massive generalisation based on a tiny, uncontrolled sample.",
@@ -13,7 +13,7 @@
     "title": "New alloy shows promise for lighter aircraft components",
     "access": "Direct PDF link available (Open Access).",
     "overview": "The study builds on standard metallurgical theories regarding titanium-aluminium blends, specifically addressing a known gap in the literature regarding heat resistance at high altitudes. It uses previous stress-testing models responsibly to predict performance.",
-    "methods": "The team conducted rigorous stress-testing in controlled lab conditions, repeating the fracture test 500 times. Data availability: Full datasets, stress-test logs and the statistical code used for analysis have been uploaded to a public repository (OSF/GitHub) for verification.",
+    "methods": "The team conducted rigorous stress-testing in controlled lab conditions, repeating the fracture test 500 times. Data availability: Stress-test logs and statistical code are uploaded to a public repository (OSF/GitHub). However, the precise alloy composition ratios have been withheld pending a patent application, which prevents full independent replication of the material itself.",
     "conclusion": "The conclusion is cautious. It states the alloy is significantly lighter but notes it is currently too expensive for commercial use, suggesting further research into manufacturing costs is required.",
     "source": "Respected Field-Specific Journal. A well-regarded peer-reviewed publication specialising in materials science and engineering."
   },
@@ -29,7 +29,7 @@
   {
     "id": "STUDY-4",
     "title": "The neuroprotective effects of a daily herbal tea infusion on Alzheimer's disease prevention",
-    "access": "Behind a publisher paywall (£49 for 24 hours access).",
+    "access": "Free to read online (Open Access). Like many predatory journals, this outlet charges authors a fee to publish rather than charging readers — a misleading signal of quality.",
     "overview": "The premise is loosely based on traditional folk medicine practices. It ignores current neurological understanding of amyloid plaques and tau tangles, which are the primary biological markers of Alzheimer's disease.",
     "methods": "A 6-week observational study of 40 people who already chose to drink the tea daily. There was no randomised control group. Cognition was measured via brief phone interviews rather than clinical scanning. Data availability: ‘Raw data unavailable due to participant confidentiality.’",
     "conclusion": "Overblown. The study confuses a short-term feeling of alertness (likely from caffeine) with the long-term prevention of a complex neurodegenerative disease.",
@@ -42,7 +42,7 @@
     "overview": "The study investigates the ecological validity of previous lab-based findings. It questions whether the harm seen in petri dishes translates to real-world farming environments, a valid scientific question.",
     "methods": "A large-scale field trial across 20 farms over two years, using RFID tags to track thousands of individual bees. The methodology was pre-registered (declared before the experiment started) to prevent cherry-picking results. Data availability: Full datasets and tracking code are uploaded to a public repository (Zenodo).",
     "conclusion": "Cautious and specific. It states that at current agricultural usage levels, this specific chemical does not significantly impair homing flight, but explicitly warns against applying this finding to other insect species.",
-    "source": "Respected Field-Specific Journal. Published in a top-tier peer-reviewed journal dedicated to ecology and entomology."
+    "source": "Respected Field-Specific Journal. Published in a top-tier peer-reviewed journal dedicated to ecology and entomology. Note: the field trial was co-funded by the manufacturer of the pesticide under study — a declared conflict of interest. The preregistration limits bias, but commercial influence on which results get published cannot be ruled out."
   },
   {
     "id": "STUDY-6",
@@ -65,9 +65,9 @@
   {
     "id": "STUDY-8",
     "title": "Marginal efficiency gains in perovskite solar cells through new layering technique",
-    "access": "Open Access.",
+    "access": "Accessible via institutional subscription (paywalled). The journal does not offer open access by default; an author-accepted manuscript may be available through a preprint server.",
     "overview": "The study directly addresses a known engineering bottleneck in electron transport layers. It references the specific physics of perovskite crystal degradation responsibly.",
-    "methods": "Rigorous laboratory testing under standard solar simulation conditions. The experiment was replicated by a second, independent lab before publication to ensure accuracy. Data availability: All spectral data and fabrication recipes are included in the supplementary materials file.",
+    "methods": "Rigorous laboratory testing under standard solar simulation conditions. The experiment was replicated by a second, independent lab before publication. Data availability: Spectral data and test results are fully published; however, the precise fabrication parameters for the proprietary layer composition have been withheld pending patent approval, limiting full independent replication.",
     "conclusion": "Accurate and boring. Reports a 1.5% efficiency increase. Critically, it notes that the new material degrades faster in humidity, admitting it is not yet ready for commercial use.",
     "source": "Top-Tier Generalist Journal. Published in a journal equivalent to Nature or Science, known for publishing significant breakthroughs with rigorous review."
   },
@@ -78,7 +78,7 @@
     "overview": "Relies on theories of cognitive desensitisation but attempts to map complex behavioural psychology onto simple blood-flow changes in the brain without sufficient justification.",
     "methods": "A laboratory study of 60 university students. Half played a violent game for 20 minutes, half played a puzzle game, then viewed images of injuries whilst in an fMRI scanner. The analysis of specific brain regions was NOT preregistered. Data availability: Data not shared.",
     "conclusion": "The authors claim a definitive link to real-world violence based only on short-term brain activity changes. They did not measure actual aggressive behaviour or long-term effects.",
-    "source": "Mid-Tier Journal. A legitimate journal, but one that has been criticised in the past for accepting small-sample neuroscience studies that generate catchy headlines."
+    "source": "Mid-Tier Journal. A legitimate journal, but one that has been criticised in the past for accepting small-sample neuroscience studies with overreaching titles."
   },
   {
     "id": "STUDY-10",
@@ -92,7 +92,7 @@
   {
     "id": "STUDY-11",
     "title": "An evolutionary explanation for the correlation between height and CEO status in males",
-    "access": "Accessible with difficulty (requires requesting a copy on a scientific social network).",
+    "access": "Freely available for download (preprint server). Because the paper has not been accepted by a journal, there is no paywall — anyone can read it immediately.",
     "overview": "Uses evolutionary psychology to suggest height signals dominance. It fails to account for the ‘halo effect’ (social bias) and treats modern corporate structures as if they are prehistoric hunter-gatherer societies.",
     "methods": "The authors looked at the height of CEOs in Fortune 500 companies and compared them to the national average. No measure of actual company performance, profit or leadership skill was included. Data availability: A spreadsheet of CEO heights is available on request.",
     "conclusion": "Overblown. It confuses a societal bias (we promote tall men) with an inherent evolutionary ability (tall men are better leaders).",
@@ -111,7 +111,7 @@
     "title": "Dietary Adaptation of Urban Foxes to Include High Levels of Anthropogenic Food Waste",
     "access": "Behind a paywall.",
     "overview": "Relies on standard ecological theory regarding ‘dietary plasticity’ in opportunistic omnivores (animals that eat anything). It fits well with existing urban ecology literature.",
-    "methods": "Rigorous analysis of stomach contents of 300 deceased foxes collected over five years across three cities. Results were compared against rural fox diets. Data availability: Summary tables provided in the paper; full dietary datasets available on request to bona fide researchers.",
+    "methods": "Rigorous analysis of stomach contents of 300 deceased foxes collected over five years across three cities. Results were compared against rural fox diets. Data availability: Summary tables in the appendix; full dietary datasets nominally available on request, though the corresponding author's response to data-sharing enquiries has reportedly been slow — an effective barrier to independent reanalysis.",
     "conclusion": "Solid. It concludes that urban foxes are highly dependent on anthropogenic (human) food sources, which may have implications for their health and population density.",
     "source": "Respected Field-Specific Journal. A specialised journal for Zoology and Ecology, known for solid, data-driven science."
   },
@@ -129,7 +129,7 @@
     "title": "The Effect of Passive Listening to Classical Music on Abstract Reasoning Performance",
     "access": "Behind a paywall.",
     "overview": "A rehash of the ‘Mozart Effect,’ a theory largely debunked by modern psychology. It suggests passive listening boosts general intelligence, rather than just temporary arousal or mood.",
-    "methods": "30 students took a short logic test after 10 minutes of Mozart, and another test after 10 minutes of silence. It did not measure IQ (which is a stable trait), but rather performance on one specific puzzle. The hypothesis was not preregistered. Data availability: Not provided.",
+    "methods": "30 students took a short logic test after 10 minutes of Mozart, and another test after 10 minutes of silence, in counterbalanced order (half took Mozart first) to control for learning effects. It did not measure IQ (which is a stable trait), but rather performance on one specific puzzle. The hypothesis was not preregistered. Data availability: Individual test scores are deposited in the journal's supplementary data repository.",
     "conclusion": "Overblown. It found a tiny, temporary improvement in one task and generalised it to ‘raising IQ,’ implying a permanent cognitive upgrade.",
     "source": "Low-Tier Journal. A peer-reviewed journal, but one with a low impact factor that often publishes ‘novelty’ psychology studies."
   },
@@ -158,12 +158,12 @@
     "overview": "Investigates the ‘gut-brain axis,’ a legitimate and exciting new field. However, the theory reduces a complex biopsychosocial disorder (depression) to a single biological cause.",
     "methods": "Transferred fecal microbiota from depressed humans into sterile mice. The specific behavioural scoring criteria were preregistered. The mice showed behavioural changes associated with rodent stress. Data availability: Data available upon request.",
     "conclusion": "Overblown title. The study shows an interesting mechanism in mice, but the title makes a massive leap to claiming it is the sole cause of depression in humans, ignoring trauma and social factors.",
-    "source": "Respected Field-Specific Journal. A solid microbiology journal. The study is good; the interpretation of the conclusion (often by the press office) is the problem."
+    "source": "Respected Field-Specific Journal. A solid microbiology journal. The study itself is sound; the overreaching title is the problem."
   },
   {
     "id": "STUDY-19",
-        "title": "A 2,000-year reconstruction of Northern Hemisphere summer temperatures",
-    "access": "Open Access.",
+    "title": "A 2,000-year reconstruction of Northern Hemisphere summer temperatures",
+    "access": "Behind a paywall (institutional subscription required). Like most journals in this publishing family, the final version requires a subscription. An author-accepted manuscript is available through some university repositories.",
     "overview": "Dendroclimatology (using tree rings as proxies for past climate). The study uses established protocols for calibrating tree ring width against known temperature records.",
     "methods": "Combined thousands of tree-ring datasets from across Europe and Asia. Used rigorous statistical modelling to account for uncertainties and outliers. Data availability: The entire dataset of proxy records and the reconstruction code are hosted on the NOAA Paleoclimatology database.",
     "conclusion": "Robust. It shows current warming is unprecedented in the context of the last two millennia. The conclusion is highly specific about geographical limitations and statistical margins of error.",
@@ -192,7 +192,7 @@
     "title": "Objective Tracking of Late-Night Smartphone Use and its Association with Lower Sleep Quality in Adolescents",
     "access": "Behind a paywall.",
     "overview": "Builds on previous survey data but aims to correct the ‘recall bias’ (memory errors) of those studies by using digital tracking.",
-    "methods": "500 teenagers installed an app that tracked exact phone usage times and wore an actigraphy wristband to measure actual sleep patterns for two weeks. The statistical analysis plan was preregistered on OSF to prevent p-hacking. Data availability: Anonymised, aggregated data is available on the Open Science Framework (OSF), but individual raw traces are hidden for privacy.",
+    "methods": "500 teenagers installed an app that tracked exact phone usage times and wore an actigraphy wristband to measure actual sleep patterns for two weeks. The statistical analysis plan was preregistered on OSF to prevent <i>p</i>-hacking. Data availability: Anonymised, aggregated data is available on the Open Science Framework (OSF), but individual raw traces are hidden for privacy.",
     "conclusion": "Strong. The use of objective measurement tools removes memory bias. The conclusion accurately reports a significant negative correlation between screen usage after 10 PM and sleep duration.",
     "source": "High-Impact Generalist Journal. A top-tier journal known for rigorous medical and health sciences research."
   },
@@ -206,11 +206,11 @@
     "source": "Low-Tier Dermatology Journal. Peer-reviewed but known for accepting industry-sponsored cosmetic studies with weak controls."  },
   {
     "id": "STUDY-24",
-    "title": "The efficacy of mindfulness meditation as an intervention for chronic pain: a systematic review",
+    "title": "The efficacy of mindfulness meditation as an intervention for chronic pain: A systematic review",
     "access": "Open Access via Cochrane Library.",
     "overview": "Meta-analysis of 38 randomised controlled trials investigating mindfulness-based interventions for chronic pain conditions. Uses established frameworks from pain neuroscience and psychological interventions.",
     "methods": "Systematic review following Cochrane protocols. Included 3,500+ participants across multiple pain conditions. Pre-registered methodology. Independent reviewers assessed bias. Full PRISMA checklist provided. Data availability: All extracted data and analysis code publicly available.",
-    "conclusion": "Cautious and specific. Reports moderate effect size for pain reduction (d=0.33) but notes high heterogeneity between studies. Acknowledges mindfulness works better for some pain types than others and cannot replace medical treatment.",
+    "conclusion": "Cautious and specific. Reports moderate effect size for pain reduction (<i>d</i>=0.33) but notes high heterogeneity between studies. Acknowledges mindfulness works better for some pain types than others and cannot replace medical treatment.",
     "source": "Cochrane Database of Systematic Reviews. Gold-standard source for evidence synthesis. Rigorous peer review and editorial oversight."
   },
   {
@@ -232,10 +232,10 @@
   },
   {
     "id": "STUDY-27",
-    "title": "The predictive relationship between income inequality and population health outcomes: a longitudinal study",
+    "title": "The predictive relationship between income inequality and population health outcomes: A longitudinal study",
     "access": "Open Access.",
     "overview": "Uses 40 years of data across 50 countries to examine Gini coefficient and health metrics. Builds on established social epidemiology theories and addresses confounders like absolute poverty and healthcare spending.",
-    "methods": "Sophisticated multi-level modelling using WHO and World Bank datasets. Pre-registered analysis plan. Extensive sensitivity analyses. Controls for GDP, healthcare access, education. Data availability: All code and datasets publicly archived.",
+    "methods": "Sophisticated multi-level modelling using WHO and World Bank datasets. Pre-registered analysis plan. Extensive sensitivity analyses. Controls for GDP, healthcare access, education. Data availability: All code and datasets publicly archived. Note: approximately 15% of country-year observations had missing health data requiring multiple imputation; sensitivity analyses confirm findings are robust, but the imputation assumptions are consequential.",
     "conclusion": "Robust but carefully worded. Shows strong association between inequality and life expectancy, infant mortality, and mental health even after controlling for absolute wealth. Acknowledges causation cannot be proven from observational data.",
     "source": "Top-Tier Public Health Journal. Known for rigorous statistical review and replication-friendly practices."
   },
@@ -259,7 +259,7 @@
   },
   {
     "id": "STUDY-30",
-    "title": "Association between Mediterranean diet adherence and dementia risk: a 25-year follow-up study",
+    "title": "Association between Mediterranean diet adherence and dementia risk: A 25-year follow-up study",
     "access": "Behind paywall.",
     "overview": "Prospective cohort study using validated food frequency questionnaires. Builds on established nutrition epidemiology and neurodegeneration research.",
     "methods": "Followed 8,000 participants for 25 years. Used standardised dementia assessments. Controlled for education, exercise, smoking, genetics (APOE4). However, diet was self-reported (not objectively measured) and adherence could change over time. Data availability: Aggregate data in appendix; individual data on request.",
@@ -268,8 +268,8 @@
   },
   {
     "id": "STUDY-31",
-    "title": "The impact of daily reading to infants on language skill acquisition at age 3: a randomised trial",
-    "access": "Open Access.",
+    "title": "The impact of daily reading to infants on language skill acquisition at age 3: A randomised trial",
+    "access": "Behind a paywall (institutional subscription). Despite being a strong study, the journal does not offer free access by default.",
     "overview": "Tests early literacy intervention grounded in developmental psychology and neurolinguistics. Addresses known socioeconomic disparities in language exposure.",
     "methods": "Cluster-randomised trial (randomisation at community health centre level). <i>N</i>=600 families. Intervention group received books and training. Control group received standard care. Assessments blinded. Pre-registered outcomes. Data availability: De-identified data and analysis scripts on OSF.",
     "conclusion": "Measured and specific. Reports significant improvements in vocabulary and grammar but notes effects were strongest in lower-income families and attenuated by age 5. Does not claim reading alone solves educational inequality.",
@@ -289,7 +289,7 @@
     "title": "A machine learning algorithm for early detection of pancreatic cancer from routine blood tests",
     "access": "Open Access.",
     "overview": "Uses metabolomics and machine learning on electronic health records. Pancreatic cancer is notoriously hard to detect early, so this addresses a critical clinical gap.",
-    "methods": "Analysed blood samples from 500 eventual pancreatic cancer patients and 1,500 matched controls. External validation cohort of 400 patients. Algorithm development properly separated from testing set. Cross-validated. Data availability: Model code open-sourced; patient data available to approved researchers (privacy restrictions).",
+    "methods": "Analysed blood samples from 500 eventual pancreatic cancer patients and 1,500 matched controls. External validation cohort of 400 patients. Algorithm development properly separated from testing set. Cross-validated. Data availability: Model code is open-sourced; patient data is technically available to approved researchers, but access requires a formal ethics committee review — a process that typically takes 6–12 months and is accessible mainly to well-resourced academic institutions.",
     "conclusion": "Promising but appropriately cautious. Notes the 92% accuracy needs prospective validation before clinical use. Acknowledges false positives would cause anxiety and unnecessary procedures. Calls for multi-site replication.",
     "source": "High-Impact Medical AI Journal. Requires detailed reporting of AI methods and external validation."
   },
@@ -322,10 +322,10 @@
   },
   {
     "id": "STUDY-37",
-    "title": "Psilocybin-assisted therapy for treatment-resistant depression: a double-blind RCT",
+    "title": "Psilocybin-assisted therapy for treatment-resistant depression: A double-blind RCT",
     "access": "Open Access.",
     "overview": "Investigates psychedelic therapy for depression. Builds on neuroscience of serotonin receptors and psychological theories of set/setting in psychedelic therapy.",
-    "methods": "Randomised, double-blind, placebo-controlled trial. <i>N</i>=100 patients who failed at least 2 antidepressants. Rigorous screening, therapy protocol standardised, independent assessors. 6-month follow-up. Pre-registered. Data availability: Full anonymised data on approved repository.",
+    "methods": "Randomised, double-blind, placebo-controlled trial. <i>N</i>=100 patients who failed at least 2 antidepressants. Rigorous screening, therapy protocol standardised, independent assessors. 6-month follow-up. Pre-registered. Data availability: Full anonymised data has been deposited in a controlled-access repository; access requires a formal application reviewed by an independent ethics committee, which in practice takes several months and is not straightforward for independent researchers.",
     "conclusion": "Careful interpretation. Shows significant symptom reduction but notes therapy protocol was intensive (not just the drug alone), some patients relapsed, and long-term safety still unknown. Calls for larger trials.",
     "source": "Top-Tier Psychiatry Journal. Known for conservative editorial standards and emphasis on clinical significance."
   },
@@ -340,7 +340,7 @@
   },
   {
     "id": "STUDY-39",
-    "title": "Accelerating sea level rise through 2100: an analysis of global climate models",
+    "title": "Accelerating sea level rise through 2100: An analysis of global climate models",
     "access": "Open Access.",
     "overview": "Uses ensemble of climate models (CMIP6) with updated ice sheet dynamics. Builds on established physics of thermal expansion and glaciology.",
     "methods": "Multi-model comparison with rigorous uncertainty quantification. Incorporates satellite data, tide gauges, and paleoclimate proxies for validation. Pre-registered methodology. Data availability: All model outputs and code archived in public repositories.",
@@ -362,7 +362,7 @@
     "access": "Open Access.",
     "overview": "Follows high-risk individuals taking daily PrEP medication. Grounded in virology and pharmacokinetics of antiretroviral drugs.",
     "methods": "Prospective cohort of 5,000 participants. Adherence monitored via pharmacy refills and drug level testing. Compared to matched historical controls. Independent outcome ascertainment. Data availability: De-identified data on request.",
-    "conclusion": "Strong evidence but emphasises adherence. Near-perfect protection when taken consistently, but effectiveness drops sharply with missed doses. Notes PrEP doesn't protect against other STIs.",
+    "conclusion": "Strong evidence but emphasises adherence. Near-perfect protection when taken consistently, but effectiveness drops sharply with missed doses. Notes PrEP doesn't protect against other STIs. Notably, the effectiveness estimates rest on comparison to historical controls rather than a concurrent randomised group — a meaningful methodological limitation the authors acknowledge only briefly in the supplementary material.",
     "source": "Top-Tier Infectious Disease Journal. Rigorous review and high clinical relevance standards."
   },
   {
@@ -380,12 +380,12 @@
     "access": "Behind paywall.",
     "overview": "Uses CRISPR-Cas9 to edit patient's own hematopoietic stem cells, correcting the genetic mutation causing sickle cell disease. Grounded in molecular biology and gene therapy.",
     "methods": "Single-arm trial (no control group - unethical to withhold treatment from sick patients). <i>N</i>=15 patients with severe sickle cell disease. 2-year follow-up. Rigorous safety monitoring. Data availability: Patient-level data restricted; summary data in paper.",
-    "conclusion": "Promising but appropriately cautious. All patients showed improvement, but long-term effects unknown. Procedure is extremely expensive and complex. Acknowledges off-target editing detected in 2 patients (monitoring ongoing).",
+    "conclusion": "The title overclaims for a 15-patient single-arm trial. 'Correction of the mutation' implies completeness that two years of follow-up cannot yet establish. The paper itself is more careful: all patients showed meaningful improvement, but long-term durability is unknown, the procedure is extremely expensive, and off-target editing was detected in 2 patients (ongoing monitoring required).",
     "source": "Top-Tier Medical Journal. Requires independent data monitoring boards for clinical trials."
   },
   {
     "id": "STUDY-44",
-    "title": "The efficacy of an organic diet in preventing all diseases: a 10-year study",
+    "title": "The efficacy of an organic diet in preventing all diseases: A 10-year study",
     "access": "Published on organic food industry website.",
     "overview": "Massively overstates findings. 'All diseases' claim ignores genetics, smoking, exercise, and countless other factors.",
     "methods": "Observational study comparing organic food shoppers to general population. No control for income, education, or overall healthy lifestyle (people who buy organic often exercise more, smoke less, etc.). Data availability: Not provided.",

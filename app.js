@@ -1,6 +1,7 @@
 // Import Firebase modules
 import { database } from './firebase-config.js';
 import { ref, set, get, onValue } from 'firebase/database';
+import Chart from 'chart.js/auto';
 
 // Application State
 let currentPage = 0;
@@ -18,30 +19,32 @@ let celebratedPapers = new Set(); // Track papers where 90%+ was achieved
 let pageDisplayTimestamps = {}; // Track when each paper page is displayed for response time calculation
 let isViewingResults = false; // Flag to indicate viewing someone else's results (read-only mode)
 
-// Counterbalancing state
-let featureOrderConfig = [];
-let assignedListId = null;
-let featureOrder = [];
-let featureLabels = [];
+// Criterion token allocation (20 tokens distributed across 6 criteria)
+let criterionTokens = { title: 0, access: 0, source: 0, theory: 0, methods: 0, conclusion: 0 };
+const CRITERIA = [
+    { key: 'title',      label: '📰 Title' },
+    { key: 'access',     label: '📚 Access' },
+    { key: 'source',     label: '🏛️ Source' },
+    { key: 'theory',     label: '🔬 Theory' },
+    { key: 'methods',    label: '📊 Methods & Data' },
+    { key: 'conclusion', label: '📝 Conclusion' }
+];
 
-// Session timeout configuration (to prevent excessive Firebase costs)
-const INITIAL_SESSION_DURATION = 30 * 60 * 1000; // 30 minutes initially
-const EXTENSION_DURATION = 5 * 60 * 1000; // 5 minute extensions
-const ABSOLUTE_MAX_DURATION = 50 * 60 * 1000; // 50 minutes absolute maximum
-const WARNING_TIMES = [15 * 60 * 1000, 5 * 60 * 1000]; // Warnings at 15 min and 5 min remaining
-const EXTENSION_PROMPT_TIME = 1 * 60 * 1000; // Ask to extend 1 min before end
-let sessionStartTime = null;
-let currentSessionEnd = INITIAL_SESSION_DURATION; // Current deadline (can be extended)
+// Session timeout configuration — inactivity-based disconnect
+const INACTIVITY_TIMEOUT = 10 * 60 * 1000; // Disconnect after 10 minutes of inactivity
+const INACTIVITY_WARNING = 5 * 60 * 1000;  // Warn when 5 minutes of inactivity remain
+const ABSOLUTE_MAX_DURATION = 50 * 60 * 1000; // Hard cap: disconnect after 50 minutes regardless
+let lastActivityTime = null;
 let sessionTimeoutId = null;
-let extensionPromptTimeoutId = null;
-let warningTimeouts = []; // Track multiple warning timeouts
+let warningTimeoutId = null;
+let absoluteTimeoutId = null;
+let inactivityWarningShown = false;
 let firebaseListeners = []; // Track all Firebase listeners for cleanup
-let hasShownWarnings = new Set(); // Track which warnings have been shown
 
 // Seed scores (vetted expert ratings) - weighted as 100 participants each
 // Distribution: ~7 papers per quality score (1-7) for balanced assessment
 const seedScores = {
-    // Score 1 (Predatory/Pseudoscience) - 7 papers
+    // Score 1 (Predatory/Pseudoscience) - 8 papers
     'STUDY-1': 1,   // Chocolate boosts math scores - predatory journal, tiny sample
     'STUDY-4': 1,   // Herbal tea prevents Alzheimer's - predatory journal, folk medicine
     'STUDY-29': 1,  // Vaccine injury conspiracy - misinterprets data, dangerous
@@ -49,58 +52,58 @@ const seedScores = {
     'STUDY-34': 1,  // Alkaline foods - pure pseudoscience, no research
     'STUDY-40': 1,  // Chemtrails mind control - pure fabrication
     'STUDY-46': 1,  // Detox tea - fraudulent marketing, no study
+    'STUDY-48': 1,  // Magnet arthritis - pseudoscience, product website, testimonials only
     
-    // Score 2 (Marketing/Severe Conflicts) - 7 papers
+    // Score 2 (Marketing/Severe Conflicts) - 9 papers
     'STUDY-7': 2,   // AI hiring tool - corporate white paper, biased data
     'STUDY-11': 2,  // Tall men as CEOs - preprint, evolutionary psych overreach
+    'STUDY-17': 2,  // Remote work - corporate marketing report, major conflict of interest
     'STUDY-20': 2,  // Bitcoin stabilizes economy - non-peer-reviewed, crypto advocacy
     'STUDY-28': 2,  // Energy drink performance - corporate funded, cherry-picked
     'STUDY-36': 2,  // Probiotic yogurt - company press release, vague claims
     'STUDY-38': 2,  // GMO safety panel - industry bias, cherry-picked literature
     'STUDY-42': 2,  // Testosterone therapy - clinic advertising, profit motive
+    'STUDY-44': 2,  // Organic diet - organic trade association, industry-funded, no controls
     
-    // Score 3 (Weak but Legitimate Attempt) - 7 papers
+    // Score 3 (Weak but Legitimate Attempt) - 5 papers
     'STUDY-9': 3,   // Violent video games - small sample, not preregistered
     'STUDY-12': 3,  // Lavender insomnia - small trial, weak controls, aromatherapy basis
     'STUDY-15': 3,  // Classical music raises IQ - Mozart effect rehash, tiny effect
-    'STUDY-17': 3,  // Remote work productivity - self-reported feelings only
     'STUDY-23': 3,  // Peptide cream - company trial, self-assessment, no blinding
     'STUDY-25': 3,  // Crystal water - alternative medicine trial, weak methodology
-    'STUDY-44': 3,  // Organic food - observational, massive confounders
     
-    // Score 4 (Decent but Limited) - 8 papers
+    // Score 4 (Decent but Limited) - 5 papers
     'STUDY-6': 4,   // Instagram anxiety - large survey but correlation not causation
-    'STUDY-14': 4,  // Mars soil crops - good methods but title misleads on safety
     'STUDY-18': 4,  // Gut bacteria depression - good mouse study, overblown conclusions
     'STUDY-26': 4,  // Alzheimer's drug - high dropout rate, pharma funded
-    'STUDY-27': 4,  // Income inequality health - observational only, cannot prove causation
     'STUDY-30': 4,  // Mediterranean diet - good observational study, self-reported
     'STUDY-35': 4,  // Green space mental health - correlation only, income confounders
-    'STUDY-48': 4,  // Magnet arthritis - weak evidence, likely placebo effect
     
-    // Score 5 (Good Methods with Limitations) - 6 papers
+    // Score 5 (Good Methods with Limitations) - 8 papers
     'STUDY-3': 5,   // Screens delay sleep - good theory, large sample, self-reported
     'STUDY-5': 5,   // Pesticide bees - field trial, preregistered, specific claims
     'STUDY-13': 5,  // Urban foxes diet - rigorous methods, respected journal
+    'STUDY-14': 5,  // Mars soil crops - rigorous methods, open data, cautious conclusion
     'STUDY-16': 5,  // EV battery cold - solid physics, government research
     'STUDY-21': 5,  // Vertical farms - life-cycle assessment, trade-offs acknowledged
+    'STUDY-27': 5,  // Income inequality health - top-tier journal, pre-registered, public data
     'STUDY-45': 5,  // Sitting breaks - randomized crossover, short-term only
     
-    // Score 6 (Rigorous, Top Journals) - 7 papers
-    'STUDY-2': 6,   // Aircraft alloy - rigorous testing, open data, cautious conclusion
+    // Score 6 (Rigorous, Top Journals) - 9 papers
+    'STUDY-2': 6,   // Aircraft alloy - rigorous testing, patent data withheld, cautious conclusion
+    'STUDY-8': 6,   // Solar cells - independent replication, top journal, but key data withheld pending patent
     'STUDY-10': 6,  // Microplastics blood - novel method, contamination controls, alarming but careful
     'STUDY-22': 6,  // Smartphone sleep tracking - objective measures, preregistered, top journal
     'STUDY-31': 6,  // Reading to infants - cluster RCT, blinded assessment, open data
     'STUDY-33': 6,  // AI cancer detection - external validation, appropriately cautious
     'STUDY-37': 6,  // Psilocybin therapy - double-blind RCT, standardized protocol, conservative
     'STUDY-41': 6,  // PrEP HIV prevention - prospective cohort, emphasizes adherence
+    'STUDY-43': 6,  // CRISPR sickle cell - N=15 single-arm, off-target edits detected, overclaiming title
     
-    // Score 7 (Gold Standard) - 6 papers
-    'STUDY-8': 7,   // Solar cells - independent replication, top journal, full transparency
+    // Score 7 (Gold Standard) - 4 papers
     'STUDY-19': 7,  // Climate reconstruction - thousands of datasets, rigorous stats, NOAA archived
     'STUDY-24': 7,  // Mindfulness pain - Cochrane systematic review, meta-analysis, gold standard
     'STUDY-39': 7,  // Sea level rise - multi-model ensemble, uncertainty quantified, archived
-    'STUDY-43': 7,  // CRISPR sickle cell - clinical trial, independent monitoring, long follow-up
     'STUDY-47': 7   // Participatory budgeting - mixed methods, preregistered, nuanced conclusions
 };
 const seedWeight = 100; // Each seed score counts as 100 participants
@@ -548,7 +551,8 @@ function saveState() {
         sessionId,
         hasUsedBackButton,
         celebratedPapers: Array.from(celebratedPapers),
-        pageDisplayTimestamps
+        pageDisplayTimestamps,
+        criterionTokens
     };
     localStorage.setItem('workshopState', JSON.stringify(state));
 }
@@ -568,6 +572,7 @@ function loadState() {
             hasUsedBackButton = state.hasUsedBackButton || false;
             celebratedPapers = new Set(state.celebratedPapers || []);
             pageDisplayTimestamps = state.pageDisplayTimestamps || {};
+            criterionTokens = state.criterionTokens || { title: 0, access: 0, source: 0, theory: 0, methods: 0, conclusion: 0 };
             return true; // State was loaded
         }
     } catch (error) {
@@ -634,150 +639,70 @@ function displayUsername() {
 
 // Start session timeout to prevent excessive Firebase usage
 function startSessionTimeout() {
-    sessionStartTime = Date.now();
-    currentSessionEnd = INITIAL_SESSION_DURATION;
-    
-    // Update timer display every minute
-    updateTimerDisplay();
-    const timerInterval = setInterval(() => {
-        const elapsed = Date.now() - sessionStartTime;
-        if (elapsed >= ABSOLUTE_MAX_DURATION) {
-            clearInterval(timerInterval);
-        }
-        updateTimerDisplay();
-    }, 60000); // Update every minute
-    
-    // Set up warning timeouts
-    scheduleWarnings();
-    
-    // Set up extension prompt (1 minute before current deadline)
-    scheduleExtensionPrompt();
-    
-    // Set session end timeout
-    sessionTimeoutId = setTimeout(() => {
-        clearInterval(timerInterval);
-        endSession();
-    }, currentSessionEnd);
-}
+    lastActivityTime = Date.now();
+    resetInactivityTimer();
 
-// Schedule warning messages
-function scheduleWarnings() {
-    // Clear existing warnings
-    warningTimeouts.forEach(id => clearTimeout(id));
-    warningTimeouts = [];
-    
-    WARNING_TIMES.forEach(warningTime => {
-        const triggerTime = currentSessionEnd - warningTime;
-        if (triggerTime > 0 && !hasShownWarnings.has(warningTime)) {
-            const timeoutId = setTimeout(() => {
-                showSessionWarning(warningTime);
-                hasShownWarnings.add(warningTime);
-            }, triggerTime);
-            warningTimeouts.push(timeoutId);
-        }
+    // Listen for user activity to reset the inactivity timer
+    ['click', 'keydown', 'touchstart', 'scroll'].forEach(event => {
+        document.addEventListener(event, onUserActivity, { passive: true });
     });
+
+    // Hard cap: end session after 50 minutes regardless of activity
+    absoluteTimeoutId = setTimeout(() => {
+        endSession();
+    }, ABSOLUTE_MAX_DURATION);
+
+    // Update timer display every 30 seconds
+    setInterval(updateTimerDisplay, 30000);
+    updateTimerDisplay();
 }
 
-// Schedule extension prompt
-function scheduleExtensionPrompt() {
-    if (extensionPromptTimeoutId) {
-        clearTimeout(extensionPromptTimeoutId);
-    }
-    
-    const promptTime = currentSessionEnd - EXTENSION_PROMPT_TIME;
-    if (promptTime > 0 && currentSessionEnd < ABSOLUTE_MAX_DURATION) {
-        extensionPromptTimeoutId = setTimeout(() => {
-            showExtensionPrompt();
-        }, promptTime);
-    }
+// Called on any user interaction — resets the inactivity countdown
+function onUserActivity() {
+    lastActivityTime = Date.now();
+    inactivityWarningShown = false;
+    resetInactivityTimer();
 }
 
-// Show warning that time is running low
-function showSessionWarning(remainingTime) {
-    const minutes = Math.floor(remainingTime / 60000);
-    alert(`⏰ ${minutes} minutes remaining in your session.`);
-}
+// (Re)start the inactivity disconnect timer
+function resetInactivityTimer() {
+    if (sessionTimeoutId) clearTimeout(sessionTimeoutId);
+    if (warningTimeoutId) clearTimeout(warningTimeoutId);
 
-// Show extension prompt
-function showExtensionPrompt() {
-    const canExtend = currentSessionEnd < ABSOLUTE_MAX_DURATION;
-    
-    if (!canExtend) {
-        alert('⏰ Your session will end in 1 minute. This is the maximum session duration.');
-        return;
-    }
-    
-    const totalMinutes = Math.floor(currentSessionEnd / 60000);
-    const maxMinutes = Math.floor(ABSOLUTE_MAX_DURATION / 60000);
-    const extensionMinutes = Math.floor(EXTENSION_DURATION / 60000);
-    
-    const extend = confirm(
-        `⏰ Your ${totalMinutes}-minute session will end in 1 minute.\n\n` +
-        `Would you like to extend for ${extensionMinutes} more minutes?\n` +
-        `(Maximum total: ${maxMinutes} minutes)`
-    );
-    
-    if (extend) {
-        extendSession();
-    }
-}
+    // Warn at 5 minutes of inactivity
+    warningTimeoutId = setTimeout(() => {
+        if (!inactivityWarningShown) {
+            inactivityWarningShown = true;
+            alert('⏰ 5 minutes until your session disconnects due to inactivity.');
+        }
+    }, INACTIVITY_TIMEOUT - INACTIVITY_WARNING);
 
-// Extend the session
-function extendSession() {
-    // Clear current session timeout
-    if (sessionTimeoutId) {
-        clearTimeout(sessionTimeoutId);
-    }
-    
-    // Extend the deadline
-    const newDeadline = currentSessionEnd + EXTENSION_DURATION;
-    
-    // Cap at absolute maximum
-    currentSessionEnd = Math.min(newDeadline, ABSOLUTE_MAX_DURATION);
-    
-    // Schedule new warnings and extension prompt
-    scheduleWarnings();
-    scheduleExtensionPrompt();
-    
-    // Set new session end timeout
+    // Disconnect at 10 minutes of inactivity
     sessionTimeoutId = setTimeout(() => {
         endSession();
-    }, currentSessionEnd);
-    
-    // Update timer display immediately
-    updateTimerDisplay();
-    
-    const addedMinutes = Math.floor((currentSessionEnd - (newDeadline - EXTENSION_DURATION)) / 60000);
-    if (addedMinutes > 0) {
-        alert(`✅ Session extended! You have ${addedMinutes} more minutes.`);
-    }
+    }, INACTIVITY_TIMEOUT);
 }
 
 // Update timer display
 function updateTimerDisplay() {
-    const elapsed = Date.now() - sessionStartTime;
-    const remaining = currentSessionEnd - elapsed;
-    const minutes = Math.floor(remaining / 60000);
-    
+    const inactiveFor = Date.now() - lastActivityTime;
+    const remaining = INACTIVITY_TIMEOUT - inactiveFor;
+    const minutes = Math.max(0, Math.floor(remaining / 60000));
+
     // Calculate papers remaining
     const papersRated = Object.keys(userRatings).length;
-    const totalPapers = papers.length || 48; // Fallback to 48 if papers not loaded yet
+    const totalPapers = papers.length || 48;
     const papersRemaining = Math.max(0, totalPapers - papersRated);
-    
+
     const timerEl = document.getElementById('session-timer');
-    if (timerEl && remaining > 0) {
-        timerEl.textContent = `${minutes} min | ${papersRemaining} paper${papersRemaining !== 1 ? 's' : ''} left`;
-        // Apply warning colours based on remaining time thresholds
-        if (remaining <= 5 * 60000) {
-            timerEl.style.color = '#f56565';
-        } else if (remaining <= 15 * 60000) {
-            timerEl.style.color = '#fbbf24';
+    if (timerEl) {
+        if (remaining > 0) {
+            timerEl.textContent = `${minutes} min | ${papersRemaining} paper${papersRemaining !== 1 ? 's' : ''} left`;
+            timerEl.style.color = remaining <= 5 * 60000 ? '#f56565' : '';
         } else {
-            timerEl.style.color = '';
+            timerEl.textContent = 'Session ending...';
+            timerEl.style.color = '#f56565';
         }
-    } else if (timerEl) {
-        timerEl.textContent = 'Session ending...';
-        timerEl.style.color = '#f56565';
     }
 }
 function endSession() {
@@ -797,8 +722,13 @@ function endSession() {
     
     // Clear all timeouts
     if (sessionTimeoutId) clearTimeout(sessionTimeoutId);
-    if (extensionPromptTimeoutId) clearTimeout(extensionPromptTimeoutId);
-    warningTimeouts.forEach(id => clearTimeout(id));
+    if (warningTimeoutId) clearTimeout(warningTimeoutId);
+    if (absoluteTimeoutId) clearTimeout(absoluteTimeoutId);
+
+    // Remove activity listeners
+    ['click', 'keydown', 'touchstart', 'scroll'].forEach(event => {
+        document.removeEventListener(event, onUserActivity);
+    });
     
     // Show message and disable interaction
     const overlay = document.createElement('div');
@@ -818,12 +748,11 @@ function endSession() {
         padding: 20px;
     `;
     
-    const totalMinutes = Math.floor((Date.now() - sessionStartTime) / 60000);
     overlay.innerHTML = `
         <div>
-            <h2 style="margin-bottom: 20px; color: white;">⏰ Session Expired</h2>
+            <h2 style="margin-bottom: 20px; color: white;">⏰ Session Disconnected</h2>
             <p style="margin-bottom: 20px; color: white;">
-                Your ${totalMinutes}-minute session has ended to conserve resources.<br>
+                Your session ended due to inactivity.<br>
                 Thank you for participating!
             </p>
             <button onclick="location.reload()" style="
@@ -938,30 +867,15 @@ function shufflePapers() {
 // Load content from JSON files
 async function loadContent(shouldShuffle = true) {
     try {
-        // First, load the feature order configuration
-        const featureOrderResponse = await fetch('/feature-order-config.json');
-        if (!featureOrderResponse.ok) {
-            throw new Error(`Failed to load feature-order-config.json: ${featureOrderResponse.status}`);
-        }
-        featureOrderConfig = await featureOrderResponse.json();
-        
-        // Load all 6 rubric versions for within-participant rotation
-        const [glossaryData, rubric1, rubric2, rubric3, rubric4, rubric5, rubric6, papersData] = await Promise.all([
+        // Load content - using single rubric for all participants
+        const [glossaryData, rubricData, papersData] = await Promise.all([
             fetch('/glossary.json').then(r => { if (!r.ok) throw new Error(`glossary.json: ${r.status}`); return r.json(); }),
-            fetch('/rubric-v1.json').then(r => { if (!r.ok) throw new Error(`rubric-v1.json: ${r.status}`); return r.json(); }),
-            fetch('/rubric-v2.json').then(r => { if (!r.ok) throw new Error(`rubric-v2.json: ${r.status}`); return r.json(); }),
-            fetch('/rubric-v3.json').then(r => { if (!r.ok) throw new Error(`rubric-v3.json: ${r.status}`); return r.json(); }),
-            fetch('/rubric-v4.json').then(r => { if (!r.ok) throw new Error(`rubric-v4.json: ${r.status}`); return r.json(); }),
-            fetch('/rubric-v5.json').then(r => { if (!r.ok) throw new Error(`rubric-v5.json: ${r.status}`); return r.json(); }),
-            fetch('/rubric-v6.json').then(r => { if (!r.ok) throw new Error(`rubric-v6.json: ${r.status}`); return r.json(); }),
+            fetch('/rubric.json').then(r => { if (!r.ok) throw new Error(`rubric.json: ${r.status}`); return r.json(); }),
             fetch('/papers.json').then(r => { if (!r.ok) throw new Error(`papers.json: ${r.status}`); return r.json(); })
         ]);
         
         glossary = glossaryData;
-        // Store all rubric versions in an array (index 0 = version 1, etc.)
-        window.allRubrics = [rubric1, rubric2, rubric3, rubric4, rubric5, rubric6];
-        // Use first rubric for the guide page display
-        rubric = rubric1;
+        rubric = rubricData;
         papers = papersData;
         
         // Shuffle papers for this participant (consistent across page reloads)
@@ -1099,22 +1013,20 @@ function renderRubric() {
 function generatePaperPages() {
     const paperPagesContainer = document.getElementById('paper-pages');
     
+    // Fixed feature order for all participants: Title, Access, Source, Theory, Methods & Data, Conclusion
+    const fixedFeatureOrder = ['title', 'access', 'source', 'overview', 'methods', 'conclusion'];
+    const fixedFeatureLabels = ['📰 Title', '📚 Access', '🏛️ Source', '🔬 Study Overview', '📊 Methods & Data', '📝 Conclusion'];
+    
     papers.forEach((paper, index) => {
-        // Rotate rubric version for each paper (within-participant)
-        const rubricVersionIndex = index % 6; // 0-5
-        const config = featureOrderConfig[rubricVersionIndex];
-        const paperFeatureOrder = config.featureOrder;
-        const paperFeatureLabels = config.featureLabels;
-        
-        // Generate paper sections in counterbalanced order for this rubric version
+        // Generate paper sections in fixed order
         // Filter out 'title' feature since it is already displayed in the header
-        const paperSectionsHTML = paperFeatureOrder
+        const paperSectionsHTML = fixedFeatureOrder
             .map((feature, originalPosition) => {
                 // Skip title feature since it is already displayed in the header
                 if (feature === 'title') return '';
                 
-                const label = paperFeatureLabels[originalPosition];
-                const content = paper[feature];
+                const label = fixedFeatureLabels[originalPosition];
+                const content = (paper[feature] || '').replace('Data availability:', '<strong>Data availability:</strong>');
                 return `
                         <div class="paper-section">
                             <h3>${label}</h3>
@@ -1143,7 +1055,7 @@ function generatePaperPages() {
                     <div class="rating-section" id="rating-section-${index}">
                         <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin-bottom: 25px; border-left: 4px solid #ff9800;">
                             <h3 style="margin: 0 0 10px 0; color: #f57c00;">1️⃣ Predict the Crowd</h3>
-                            <p style="font-size: 0.95rem; color: #444; margin: 0;">Guess: What will the AVERAGE rating be from all workshop participants? Will others catch the same flaws you did?</p>
+                            <p style="font-size: 0.95rem; color: #444; margin: 0;">Guess: What will the AVERAGE rating be from all workshop participants? How do you think others will judge the overall quality of this study?</p>
                         </div>
                         <div class="rating-scale">
                             ${[1, 2, 3, 4, 5, 6, 7].map(value => `
@@ -1273,6 +1185,18 @@ function showPage(pageIndex) {
         if (percentageScore > 0) {
             document.getElementById('score-banner').style.display = 'flex';
         }
+    } else if (pageIndex === papers.length + 2) {
+        targetPage = document.getElementById('page-ranking');
+        document.getElementById('help-button').classList.remove('visible');
+        if (paperNumberElement) paperNumberElement.style.display = 'none';
+        if (navbarUsername) navbarUsername.style.display = 'none';
+        // Initialise token allocator on first visit
+        const grid = document.getElementById('criteria-token-grid');
+        if (grid && !grid.hasChildNodes()) {
+            initTokenAllocator();
+        } else {
+            updateTokenUI();
+        }
     } else {
         targetPage = document.getElementById('page-final');
         // Hide help button on final page
@@ -1299,7 +1223,7 @@ function showPage(pageIndex) {
 }
 
 function nextPage() {
-    const totalPages = papers.length + 3; // welcome + guide + papers + final
+    const totalPages = papers.length + 4; // welcome + guide + papers + ranking + final
     if (currentPage < totalPages - 1) {
         showPage(currentPage + 1);
     }
@@ -1319,10 +1243,125 @@ function finishEarly() {
         return;
     }
     
-    // Go directly to final results page
-    const finalPageIndex = papers.length + 2;
-    showPage(finalPageIndex);
+    // Navigate to criterion ranking page before final results
+    const rankingPageIndex = papers.length + 2;
+    showPage(rankingPageIndex);
 }
+
+// ===== Token Allocator =====
+
+function initTokenAllocator() {
+    criterionTokens = { title: 0, access: 0, source: 0, theory: 0, methods: 0, conclusion: 0 };
+    const grid = document.getElementById('criteria-token-grid');
+    if (!grid) return;
+    grid.innerHTML = CRITERIA.map(c => `
+        <div class="criterion-token-row">
+            <div class="criterion-token-label">
+                <span>${c.label}</span>
+                <span class="token-count-badge" id="token-count-${c.key}">0</span>
+            </div>
+            <div class="token-boxes" id="token-boxes-${c.key}">
+                ${Array.from({ length: 20 }, (_, i) =>
+                    `<div class="token-box" data-criterion="${c.key}" data-index="${i + 1}"
+                        onclick="handleTokenClick('${c.key}', ${i + 1})"></div>`
+                ).join('')}
+            </div>
+        </div>
+    `).join('');
+    updateTokenUI();
+
+    // Hover: highlight all preceding (unfilled) boxes to preview click outcome
+    grid.querySelectorAll('.token-box').forEach(box => {
+        box.addEventListener('mouseenter', () => {
+            if (box.classList.contains('disabled')) return;
+            const criterion = box.dataset.criterion;
+            const boxIndex = parseInt(box.dataset.index);
+            document.querySelectorAll(`#token-boxes-${criterion} .token-box`).forEach((b, i) => {
+                b.classList.toggle('hover-fill', i + 1 < boxIndex);
+            });
+        });
+        box.addEventListener('mouseleave', () => {
+            const criterion = box.dataset.criterion;
+            document.querySelectorAll(`#token-boxes-${criterion} .token-box`).forEach(b => b.classList.remove('hover-fill'));
+        });
+    });
+}
+
+window.handleTokenClick = function(criterion, boxIndex) {
+    const currentVal = criterionTokens[criterion];
+    const totalUsed = Object.values(criterionTokens).reduce((a, b) => a + b, 0);
+    const othersTotal = totalUsed - currentVal;
+    const maxForThis = 20 - othersTotal;
+
+    if (boxIndex > maxForThis) return; // Cannot exceed total budget
+
+    // Tap same position as current → toggle to 0 (clear criterion)
+    if (boxIndex === currentVal) {
+        criterionTokens[criterion] = 0;
+    } else {
+        criterionTokens[criterion] = boxIndex;
+    }
+    updateTokenUI();
+};
+
+function updateTokenUI() {
+    const totalUsed = Object.values(criterionTokens).reduce((a, b) => a + b, 0);
+
+    CRITERIA.forEach(c => {
+        const val = criterionTokens[c.key];
+        const othersTotal = totalUsed - val;
+        const maxForThis = 20 - othersTotal;
+
+        const badge = document.getElementById(`token-count-${c.key}`);
+        if (badge) {
+            badge.textContent = val;
+            badge.classList.toggle('complete', val > 0);
+        }
+
+        const boxes = document.querySelectorAll(`[data-criterion="${c.key}"]`);
+        boxes.forEach((box, i) => {
+            const boxNum = i + 1;
+            box.classList.toggle('filled', boxNum <= val);
+            box.classList.toggle('disabled', boxNum > maxForThis);
+        });
+    });
+
+    const usedDisplay = document.getElementById('tokens-used-display');
+    if (usedDisplay) usedDisplay.textContent = totalUsed;
+
+    const progressFill = document.getElementById('token-progress-fill');
+    if (progressFill) progressFill.style.width = `${(totalUsed / 20) * 100}%`;
+
+    const submitBtn = document.getElementById('submit-ranking-btn');
+    if (submitBtn) {
+        const allUsed = totalUsed === 20;
+        submitBtn.disabled = !allUsed;
+        submitBtn.style.opacity = allUsed ? '1' : '0.5';
+        submitBtn.textContent = allUsed
+            ? 'Submit & View My Results →'
+            : `Allocate all 20 tokens to continue (${20 - totalUsed} remaining)`;
+    }
+}
+
+window.submitRanking = async function() {
+    const totalUsed = Object.values(criterionTokens).reduce((a, b) => a + b, 0);
+    if (totalUsed !== 20) return;
+
+    try {
+        const rankingRef = ref(database, `rankings/${sessionId}`);
+        await set(rankingRef, {
+            ...criterionTokens,
+            userName: userName,
+            timestamp: Date.now()
+        });
+    } catch (error) {
+        console.error('Error saving criterion ranking:', error);
+        // Non-blocking – proceed to results even if save fails
+    }
+
+    // Navigate to final results page
+    showPage(papers.length + 3);
+};
 
 // Go back to previous study (one-time use only)
 function goBackToPreviousStudy() {
@@ -1411,9 +1450,6 @@ async function submitRating(paperIndex, paperId) {
         // Show results with pre-calculated average (for fair scoring)
         showResults(paperIndex, paperId, rating, prediction, false, averageWithoutUser);
         
-        // Calculate rubric version used for this study (1-6)
-        const rubricVersion = (paperIndex % 6) + 1;
-        
         // Calculate response time (time from page display to submission)
         const responseTime = pageDisplayTimestamps[paperId] 
             ? Date.now() - pageDisplayTimestamps[paperId]
@@ -1424,7 +1460,6 @@ async function submitRating(paperIndex, paperId) {
         await set(userRatingRef, {
             rating: rating,
             prediction: prediction,
-            rubricVersion: rubricVersion, // Record which rubric version was shown
             responseTime: responseTime, // Time in milliseconds from page display to submission
             timestamp: Date.now()
         });
@@ -1701,6 +1736,31 @@ window.addEventListener('keydown', function(event) {
 });
 
 // Show final results and leaderboard
+// Render criterion importance bars into a container element
+function renderCriterionImportanceBars(tokens, containerId) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    const total = CRITERIA.reduce((sum, c) => sum + (tokens[c.key] || 0), 0);
+    if (total === 0) {
+        container.innerHTML = '<p style="text-align: center; color: #9ca3af; margin: 0;">No weighting data available.</p>';
+        return;
+    }
+    container.innerHTML = CRITERIA.map(c => {
+        const val = tokens[c.key] || 0;
+        const pct = Math.round((val / total) * 100);
+        return `
+            <div style="margin-bottom: 0.9rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+                    <span style="font-weight: 600; font-size: 0.9rem;">${c.label}</span>
+                    <span style="font-weight: 700; color: #d97706; font-size: 0.9rem;">${pct}%</span>
+                </div>
+                <div style="background: #e5e7eb; border-radius: 4px; height: 12px; overflow: hidden;">
+                    <div style="width: ${pct}%; height: 100%; background: linear-gradient(90deg, #f59e0b, #d97706); border-radius: 4px; transition: width 0.4s ease;"></div>
+                </div>
+            </div>`;
+    }).join('');
+}
+
 function showFinalResults() {
     // Ensure glossary and rubric are rendered for the help modal
     renderGlossary();
@@ -1722,6 +1782,28 @@ function showFinalResults() {
         totalPapersElement.textContent = ratedCount;
     }
     
+    // Render criterion importance bars — always load from Firebase as source of truth
+    const criterionBarSessionId = sessionId;
+    if (criterionBarSessionId) {
+        get(ref(database, `rankings/${criterionBarSessionId}`)).then(snap => {
+            if (snap.exists()) {
+                renderCriterionImportanceBars(snap.val(), 'criterion-importance-bars');
+            } else {
+                // Firebase has no data — fall back to in-memory tokens if available
+                const tokenTotal = Object.values(criterionTokens).reduce((a, b) => a + b, 0);
+                if (tokenTotal > 0) {
+                    renderCriterionImportanceBars(criterionTokens, 'criterion-importance-bars');
+                } else {
+                    // No data anywhere — hide the section entirely
+                    const section = document.getElementById('criterion-importance-section');
+                    if (section) section.style.display = 'none';
+                }
+            }
+        }).catch(err => {
+            console.error('[CriterionImportance] Firebase read error:', err);
+        });
+    }
+    
     // Only save score to leaderboard if NOT viewing read-only results
     if (!isViewingResults) {
         const scoresRef = ref(database, `leaderboard/${sessionId}`);
@@ -1729,8 +1811,7 @@ function showFinalResults() {
             score: totalScore,
             timestamp: Date.now(),
             papersRated: Object.keys(userRatings).length,
-            userName: userName,
-            listId: assignedListId
+            userName: userName
         }).then(() => {
             // Show link copying and email buttons after save
             document.getElementById('save-results-link').style.display = 'inline-block';
@@ -1920,7 +2001,6 @@ function createComparisonChart(labels, userRatings, avgRatings) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            aspectRatio: 2,
             plugins: {
                 legend: {
                     display: true,
