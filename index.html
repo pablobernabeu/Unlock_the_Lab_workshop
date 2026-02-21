@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Unlock the Lab Workshop</title>
     <link rel="icon" type="image/x-icon" href="/assets/favicon-CLtBlbIg.ico">
-  <script type="module" crossorigin src="/assets/main-Cik7LQNF.js"></script>
+  <script type="module" crossorigin src="/assets/main-CN_Cxx6a.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/firebase-4YSElDcj.js">
-  <link rel="modulepreload" crossorigin href="/assets/firebase-config-BPW_mu1B.js">
-  <link rel="stylesheet" crossorigin href="/assets/firebase-config-BzxMrCtE.css">
+  <link rel="modulepreload" crossorigin href="/assets/firebase-config-BEVTKpGQ.js">
+  <link rel="stylesheet" crossorigin href="/assets/firebase-config-C2_IRJXQ.css">
 </head>
 <body>
     <div id="app">
@@ -134,6 +134,38 @@
         <div id="paper-pages"></div>
 
         <!-- Final Page: Recap -->
+        <!-- Token Allocation Page -->
+        <div class="page" id="page-ranking">
+            <div class="container">
+                <h1>⚖️ What Matters Most to You?</h1>
+                <div class="content">
+                    <div class="info-box" style="margin-bottom: 1.5rem;">
+                        <h3 style="margin-top: 0; color: #667eea;">Instructions</h3>
+                        <p style="margin-bottom: 0.75rem;">You have <strong>20 tokens</strong> to distribute across the six criteria you used to evaluate the studies. The more tokens you assign to a criterion, the more important it is to you.</p>
+                        <p style="margin-bottom: 0.75rem;"><strong>How to use:</strong> Tap any box in a row to fill all boxes from the left up to that position. Tap the last filled box again to clear that criterion's tokens.</p>
+                        <p style="margin: 0;"><strong>You must use all 20 tokens</strong> before you can proceed to your results.</p>
+                    </div>
+
+                    <div style="margin-bottom: 1.5rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                            <span style="font-weight: 600; color: #374151;">Tokens used:</span>
+                            <span style="font-weight: 700; font-size: 1.1rem; color: #667eea;"><span id="tokens-used-display">0</span> / 20</span>
+                        </div>
+                        <div style="background: #e5e7eb; border-radius: 8px; height: 10px; overflow: hidden;">
+                            <div id="token-progress-fill" style="height: 100%; width: 0%; background: linear-gradient(90deg, #667eea, #764ba2); border-radius: 8px; transition: width 0.2s ease;"></div>
+                        </div>
+                    </div>
+
+                    <div id="criteria-token-grid"></div>
+
+                    <button id="submit-ranking-btn" class="btn-primary" onclick="submitRanking()" disabled
+                        style="margin-top: 1.5rem; width: 100%; padding: 1rem; opacity: 0.5; font-size: 1rem;">
+                        Allocate all 20 tokens to continue
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <div class="page" id="page-final">
             <div class="container">
                 <div class="page-logo-header">
@@ -189,11 +221,26 @@
                                 <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">
                                     This chart shows how your quality ratings (purple line) compared to what other participants rated on average (green dashed line).
                                 </p>
-                                <canvas id="comparison-chart" style="height: 180px; width: 100%; display: block;"></canvas>
+                                <div style="position: relative; height: 220px;">
+                                    <canvas id="comparison-chart"></canvas>
+                                </div>
                             </div>
                         </div>
                     </div>
                     
+                    <!-- PART 3: CRITERION IMPORTANCE -->
+                    <div id="criterion-importance-section" style="margin-bottom: 2rem; padding: 1.5rem; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-radius: 12px; color: white;">
+                        <h2 style="margin-top: 0; color: white; border-bottom: 2px solid rgba(255,255,255,0.3); padding-bottom: 1rem; font-weight: 600; text-shadow: 0 1px 3px rgba(0,0,0,0.3);">
+                            ⚖️ Part 3: Your Criterion Weightings
+                        </h2>
+                        <p style="font-size: 1.05rem; margin-bottom: 1rem; font-weight: 300;">
+                            Here is how you weighted the six evaluation criteria.
+                        </p>
+                        <div id="criterion-importance-bars" style="background: rgba(255,255,255,0.95); color: #1f2937; padding: 1rem; border-radius: 10px;">
+                            <p style="text-align: center; color: #9ca3af; margin: 0;">Loading...</p>
+                        </div>
+                    </div>
+
                     <h2>You've evaluated <span id="total-papers">0</span> research papers!</h2>
                     <ul style="line-height: 1.8; padding-left: 2rem; margin: 1.5rem 0;">
                         <li style="margin-bottom: 0.75rem;"><strong>🔓 Open Access</strong> — Paywalls hide science from public scrutiny. Demand transparency!</li>
