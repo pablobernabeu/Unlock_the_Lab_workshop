@@ -1,4 +1,4 @@
-# Unlock the Lab Workshop
+# Unlock the Lab: Your guide to reading science like a scientist
 
 A web-based application for teaching critical evaluation of scientific research through interactive peer assessment.
 
