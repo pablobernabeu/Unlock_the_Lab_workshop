@@ -521,6 +521,9 @@ async function generateUniqueUsername() {
             });
         }
         
+        // Reserve 'Anonymous' so it can never be assigned to a real user
+        existingUsernames.add('Anonymous');
+
         // Attempt to generate a unique username (max 500 attempts)
         let attempts = 0;
         let username;
@@ -1874,13 +1877,16 @@ function showFinalResults() {
         const scores = snapshot.val();
         
         if (scores) {
-            const scoresArray = Object.entries(scores).map(([id, data]) => ({
-                id,
-                score: data.score,
-                timestamp: data.timestamp,
-                userName: data.userName || 'Anonymous',
-                papersRated: data.papersRated || 0
-            }));
+            const scoresArray = Object.entries(scores)
+                .map(([id, data]) => ({
+                    id,
+                    score: data.score,
+                    timestamp: data.timestamp,
+                    userName: data.userName || 'Anonymous',
+                    papersRated: data.papersRated || 0
+                }))
+                // Hide the Anonymous placeholder from all leaderboard displays
+                .filter(entry => entry.userName !== 'Anonymous');
             
             // Sort by score (descending)
             scoresArray.sort((a, b) => b.score - a.score);
